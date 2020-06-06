@@ -40,7 +40,7 @@ def draw_sun(image, radius, center_x, center_y, color):
     return image
 
 
-def generate_mountains(image, num_layers, roughness, width, height, upper_padding):
+def generate_mountains(image, num_layers, roughness):
     mountains = []
     for layer in range(num_layers):
         layer_roughness = roughness // (layer + 1)
@@ -59,15 +59,30 @@ def generate_mountains(image, num_layers, roughness, width, height, upper_paddin
 
         # layer_heights = md.normalize(layer_heights, HEIGHT - 100 - ((HEIGHT -100-100)/num_layers * (num_layers-layer-1)),
         #                             (HEIGHT -100-100)/num_layers * layer + 100) 
-        layer_heights = md.normalize(layer_heights, HEIGHT - 100 - ((HEIGHT -100-upper_padding)/num_layers * (num_layers-layer-1)),
-                                    (HEIGHT -100-upper_padding)/num_layers * layer + upper_padding) 
+        # layer_heights = md.normalize(layer_heights, HEIGHT - 100 - ((HEIGHT -100-upper_padding)/num_layers * (num_layers-layer-1)),
+        #                             (HEIGHT -100-upper_padding)/num_layers * layer + upper_padding) 
         mountains.append(layer_heights)
 
     return mountains
 
 
-def draw_mountains(image, mountains, imageWidth, imageHeight,    
-                  color):
+def normalize_mountains(mountains, height, upper_padding):
+    num_layers = len(mountains)
+    for layer in range(num_layers):
+        layer_heights = mountains[layer]
+        # normalized_layer = md.normalize(layer_heights, upper_padding, height - upper_padding)
+        # normalized_layer = md.normalize(layer_heights, height - 100 - ((height -100-upper_padding)/num_layers * (num_layers-layer-1)),
+        #                     (height -100-upper_padding)/num_layers * layer + upper_padding)
+        normalized_layer = md.normalize(layer_heights, 
+                                       (height -100-upper_padding)/num_layers * layer + upper_padding,
+                                        height - 100 - ((height -100-upper_padding)/num_layers * (num_layers-layer-1))) 
+
+        mountains[layer] = normalized_layer
+
+
+
+
+def draw_mountains(image, mountains, imageWidth, imageHeight, color):
 
     for layer in range(len(mountains)):
         # Convert the heights into the list of points of a polygon
@@ -164,7 +179,7 @@ class Window(QtWidgets.QMainWindow):
         # Upper padding
         self.__upper_padding_slider = QtWidgets.QSlider(QtCore.Qt.Horizontal)
         self.__upper_padding_slider.setMinimum(0)
-        self.__upper_padding_slider.setMaximum(HEIGHT)
+        self.__upper_padding_slider.setMaximum(HEIGHT/2)
         self.__upper_padding_slider.setValue(int(self.__upper_padding))
         self.__upper_padding_slider.valueChanged[int].connect(self.on_upper_padding_changed)
 
@@ -251,10 +266,14 @@ class Window(QtWidgets.QMainWindow):
     def on_generate_mountains_button_clicked(self):
         self.__mountains = generate_mountains(self.__image, 
                                           int(self.__mountain_layers_edit.text()), 
-                                          int(self.__roughness_edit.text()), 
-                                          WIDTH, HEIGHT, self.__upper_padding)
+                                          int(self.__roughness_edit.text()))
         self.__smooth = 0
         self.__smooth_slider.setValue(0)
+        self.__update()
+
+
+    def on_upper_padding_changed(self, value):
+        self.__upper_padding = value
         self.__update()
 
 
@@ -270,11 +289,6 @@ class Window(QtWidgets.QMainWindow):
         self.__update()
 
 
-    def on_upper_padding_changed(self, value):
-        self.__upper_padding = value
-        self.__update()
-
-
     def __update(self):
 
         # Generate Image
@@ -282,6 +296,9 @@ class Window(QtWidgets.QMainWindow):
         self.__image = draw_sun(self.__image, self.__sun_radius, self. __center_x,
                                       self.__center_y, COLOR_PALETTES[self.__color_palette]["sun"])
         mountains = self.__smoothed_mountains if self.__smooth else self.__mountains
+
+        normalize_mountains(mountains, HEIGHT, self.__upper_padding)
+
         self.__image = draw_mountains(self.__image, mountains, WIDTH, HEIGHT,    
                                       COLOR_PALETTES[self.__color_palette]["land"])
 
