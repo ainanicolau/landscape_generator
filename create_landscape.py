@@ -22,6 +22,8 @@ COLOR_PALETTES = { "Terracotta":{"sun":(60, 83, 147, 255), "sky":(163, 196, 220,
                    "land":[(50, 59, 222, 255), (26, 138, 232, 255)]}}
 
 MARGIN_OPTIONS = ["None", "Circle", "Window"]
+
+SKY_ELEMENT_OPTIONS = ["Sun", "Moon"]
 # Texture files
 TEX = "paper.png"
 
@@ -119,11 +121,19 @@ def draw_margin(image, margin, width, height):
     out = np.ones((height, width, 4), np.uint8) * 255
     mask[:,:,3] = 255
     if margin == "Circle":
-        radius = math.floor(min(width, height)/2) - 30
+        radius = math.floor(min(width, height)/2) - 30     
         center = (math.floor(width/2), math.floor(height/2))
         cv2.circle(mask, center, radius, (255, 255, 255, 255), thickness=-1)
 
-        out[mask == 255] = image[mask == 255]
+    if margin == "Window":
+        radius = math.floor(min(width, height)/2) - 50
+        center = (math.floor(width/2), math.floor(height/2) - 50)
+        cv2.circle(mask, center, radius, (255, 255, 255, 255), thickness=-1)
+        top_left = (center[0] - radius, center[1])
+        bottom_right = (center[0] + radius, center[1] + math.floor(radius * 1.5))
+        cv2.rectangle(mask,top_left,bottom_right,(255, 255, 255, 255),-1)
+
+    out[mask == 255] = image[mask == 255]
 
     return out
 
