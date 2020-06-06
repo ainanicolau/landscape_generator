@@ -66,16 +66,13 @@ def generate_mountains(image, num_layers, roughness):
     return mountains
 
 
-def normalize_mountains(mountains, height, upper_padding):
+def normalize_mountains(mountains, height, lower_padding, upper_padding):
     num_layers = len(mountains)
     for layer in range(num_layers):
         layer_heights = mountains[layer]
-        # normalized_layer = md.normalize(layer_heights, upper_padding, height - upper_padding)
-        # normalized_layer = md.normalize(layer_heights, height - 100 - ((height -100-upper_padding)/num_layers * (num_layers-layer-1)),
-        #                     (height -100-upper_padding)/num_layers * layer + upper_padding)
         normalized_layer = md.normalize(layer_heights, 
-                                       (height -100-upper_padding)/num_layers * layer + upper_padding,
-                                        height - 100 - ((height -100-upper_padding)/num_layers * (num_layers-layer-1))) 
+                                       (height -lower_padding -upper_padding)/num_layers * layer + upper_padding,
+                                        height - lower_padding - ((height - lower_padding -upper_padding)/num_layers * (num_layers-layer-1))) 
 
         mountains[layer] = normalized_layer
 
@@ -138,6 +135,7 @@ class Window(QtWidgets.QMainWindow):
         self.__roughness = 100
         self.__mountains = []
         self.__upper_padding = 100
+        self.__lower_padding = 100
         self.__smoothed_mountains = []
         self.__smooth = 0
         self.__color_palette = "Terracotta"
@@ -179,9 +177,16 @@ class Window(QtWidgets.QMainWindow):
         # Upper padding
         self.__upper_padding_slider = QtWidgets.QSlider(QtCore.Qt.Horizontal)
         self.__upper_padding_slider.setMinimum(0)
-        self.__upper_padding_slider.setMaximum(HEIGHT/2)
+        self.__upper_padding_slider.setMaximum(HEIGHT)
         self.__upper_padding_slider.setValue(int(self.__upper_padding))
         self.__upper_padding_slider.valueChanged[int].connect(self.on_upper_padding_changed)
+
+        # Lower padding
+        self.__lower_padding_slider = QtWidgets.QSlider(QtCore.Qt.Horizontal)
+        self.__lower_padding_slider.setMinimum(0)
+        self.__lower_padding_slider.setMaximum(HEIGHT)
+        self.__lower_padding_slider.setValue(int(self.__lower_padding))
+        self.__lower_padding_slider.valueChanged[int].connect(self.on_lower_padding_changed)
 
         # Smooth mountains
         self.__smooth_slider = QtWidgets.QSlider(QtCore.Qt.Horizontal)
@@ -213,6 +218,8 @@ class Window(QtWidgets.QMainWindow):
         parameters_layout.addLayout(generate_mountains_layout)
         parameters_layout.addWidget(QtWidgets.QLabel('Upper Padding'))
         parameters_layout.addWidget(self.__upper_padding_slider)
+        parameters_layout.addWidget(QtWidgets.QLabel('Lower Padding'))
+        parameters_layout.addWidget(self.__lower_padding_slider)
         parameters_layout.addWidget(QtWidgets.QLabel('Smooth'))
         parameters_layout.addWidget(self.__smooth_slider)
         parameters_layout.addWidget(QtWidgets.QLabel("Color Palette"))
@@ -273,7 +280,19 @@ class Window(QtWidgets.QMainWindow):
 
 
     def on_upper_padding_changed(self, value):
-        self.__upper_padding = value
+        if value < HEIGHT - self.__lower_padding:
+            self.__upper_padding = value
+        else:
+            self.__upper_padding = HEIGHT - self.__lower_padding - 1
+
+        self.__update()
+
+
+    def on_lower_padding_changed(self, value):
+        if value < HEIGHT - self.__upper_padding:
+            self.__lower_padding = value
+        else:
+            self.__lower_padding = HEIGHT - self.__upper_padding - 1
         self.__update()
 
 
@@ -297,7 +316,7 @@ class Window(QtWidgets.QMainWindow):
                                       self.__center_y, COLOR_PALETTES[self.__color_palette]["sun"])
         mountains = self.__smoothed_mountains if self.__smooth else self.__mountains
 
-        normalize_mountains(mountains, HEIGHT, self.__upper_padding)
+        normalize_mountains(mountains, HEIGHT, self.__lower_padding, self.__upper_padding)
 
         self.__image = draw_mountains(self.__image, mountains, WIDTH, HEIGHT,    
                                       COLOR_PALETTES[self.__color_palette]["land"])
