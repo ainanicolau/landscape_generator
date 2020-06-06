@@ -45,34 +45,18 @@ def generate_mountains(image, num_layers, roughness):
     for layer in range(num_layers):
         layer_roughness = roughness // (layer + 1)
         layer_heights = md.run_midpoint_displacement(layer_roughness)
-
-        # layer_heights = md.normalize(layer_heights, HEIGHT - IMAGE_PADDING,
-        #                           IMAGE_PADDING + layer * 200)
-        # layer_heights = md.normalize(layer_heights, HEIGHT - IMAGE_PADDING,
-        #                           IMAGE_PADDING + HEIGHT/num_layers * layer)
-        # layer_heights = md.normalize(layer_heights, HEIGHT - 100,
-        #                              (HEIGHT -100-100)/num_layers * layer + 100)
-
-        # Upper padding
-        # Lower padding
-        # mountain intersection
-
-        # layer_heights = md.normalize(layer_heights, HEIGHT - 100 - ((HEIGHT -100-100)/num_layers * (num_layers-layer-1)),
-        #                             (HEIGHT -100-100)/num_layers * layer + 100) 
-        # layer_heights = md.normalize(layer_heights, HEIGHT - 100 - ((HEIGHT -100-upper_padding)/num_layers * (num_layers-layer-1)),
-        #                             (HEIGHT -100-upper_padding)/num_layers * layer + upper_padding) 
         mountains.append(layer_heights)
 
     return mountains
 
 
-def normalize_mountains(mountains, height, lower_padding, upper_padding):
+def normalize_mountains(mountains, height, lower_padding, upper_padding, mountain_intersection):
     num_layers = len(mountains)
     for layer in range(num_layers):
         layer_heights = mountains[layer]
         normalized_layer = md.normalize(layer_heights, 
-                                       (height -lower_padding -upper_padding)/num_layers * layer + upper_padding,
-                                        height - lower_padding - ((height - lower_padding -upper_padding)/num_layers * (num_layers-layer-1))) 
+                                       (height - lower_padding - upper_padding)/num_layers * layer + upper_padding,
+                                        height - lower_padding - ((height - lower_padding -upper_padding)/num_layers * (num_layers-layer-1)) * mountain_intersection/100) 
 
         mountains[layer] = normalized_layer
 
@@ -136,6 +120,7 @@ class Window(QtWidgets.QMainWindow):
         self.__mountains = []
         self.__upper_padding = 100
         self.__lower_padding = 100
+        self.__mountain_intersection = 0
         self.__smoothed_mountains = []
         self.__smooth = 0
         self.__color_palette = "Terracotta"
@@ -188,6 +173,13 @@ class Window(QtWidgets.QMainWindow):
         self.__lower_padding_slider.setValue(int(self.__lower_padding))
         self.__lower_padding_slider.valueChanged[int].connect(self.on_lower_padding_changed)
 
+        # Mountain Intersecion
+        self.__mountain_intersection_slider = QtWidgets.QSlider(QtCore.Qt.Horizontal)
+        self.__mountain_intersection_slider.setMinimum(0)
+        self.__mountain_intersection_slider.setMaximum(100)
+        self.__mountain_intersection_slider.setValue(int(self.__mountain_intersection))
+        self.__mountain_intersection_slider.valueChanged[int].connect(self.on_mountain_intersection_changed)
+
         # Smooth mountains
         self.__smooth_slider = QtWidgets.QSlider(QtCore.Qt.Horizontal)
         self.__smooth_slider.setMinimum(0)
@@ -220,6 +212,8 @@ class Window(QtWidgets.QMainWindow):
         parameters_layout.addWidget(self.__upper_padding_slider)
         parameters_layout.addWidget(QtWidgets.QLabel('Lower Padding'))
         parameters_layout.addWidget(self.__lower_padding_slider)
+        parameters_layout.addWidget(QtWidgets.QLabel('Mountain Intersecion'))
+        parameters_layout.addWidget(self.__mountain_intersection_slider)
         parameters_layout.addWidget(QtWidgets.QLabel('Smooth'))
         parameters_layout.addWidget(self.__smooth_slider)
         parameters_layout.addWidget(QtWidgets.QLabel("Color Palette"))
@@ -296,6 +290,11 @@ class Window(QtWidgets.QMainWindow):
         self.__update()
 
 
+    def on_mountain_intersection_changed(self, value):
+        self.__mountain_intersection = value
+        self.__update() 
+
+
     def on_smooth_changed(self, value):
         self.__smooth = value
         self.__smoothed_mountains = smooth_mountains(self.__mountains, self.__smooth)
@@ -316,7 +315,7 @@ class Window(QtWidgets.QMainWindow):
                                       self.__center_y, COLOR_PALETTES[self.__color_palette]["sun"])
         mountains = self.__smoothed_mountains if self.__smooth else self.__mountains
 
-        normalize_mountains(mountains, HEIGHT, self.__lower_padding, self.__upper_padding)
+        normalize_mountains(mountains, HEIGHT, self.__lower_padding, self.__upper_padding, self.__mountain_intersection)
 
         self.__image = draw_mountains(self.__image, mountains, WIDTH, HEIGHT,    
                                       COLOR_PALETTES[self.__color_palette]["land"])
