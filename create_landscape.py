@@ -4,6 +4,7 @@ import sys
 from PyQt5 import QtCore, QtGui, QtWidgets
 import cv2
 import numpy as np
+import math
 
 import midpoint_displacement as md
 
@@ -19,6 +20,8 @@ COLOR_PALETTES = { "Terracotta":{"sun":(60, 83, 147, 255), "sky":(163, 196, 220,
                    "land":[(44, 67, 129, 255)]},
                    "Retro":{"sun":(201, 222, 237, 255), "sky":(210, 182, 88, 255),
                    "land":[(50, 59, 222, 255), (26, 138, 232, 255)]}}
+
+MARGIN_OPTIONS = ["None", "Circle", "Window"]
 # Texture files
 TEX = "paper.png"
 
@@ -31,19 +34,23 @@ def generate_image(width, height, color):
     return image
 
 
-def draw_sun(image, radius, center_x, center_y, color):
+def draw_sun(image, radius, center_x, center_y, color, white_contour):
     center = (center_x,center_y)
 
     if radius > 0:
         cv2.circle(image, center, radius, color, thickness=-1, lineType=8, shift=0)
-
+        if white_contour:
+            cv2.circle(image, center, radius, (255,255,255,255), thickness=2, lineType=8, shift=0)
     return image
 
 
-def generate_mountains(image, num_layers, roughness):
+def generate_mountains(image, num_layers, roughness, decrease_roughness):
     mountains = []
     for layer in range(num_layers):
-        layer_roughness = roughness // (layer + 1)
+        if not decrease_roughness:
+            layer_roughness = roughness
+        else:
+            layer_roughness = roughness // (layer + 1)
         layer_heights = md.run_midpoint_displacement(layer_roughness)
         mountains.append(layer_heights)
 
@@ -61,9 +68,7 @@ def normalize_mountains(mountains, height, lower_padding, upper_padding, mountai
         mountains[layer] = normalized_layer
 
 
-
-
-def draw_mountains(image, mountains, imageWidth, imageHeight, color):
+def draw_mountains(image, mountains, imageWidth, imageHeight, color, white_contour):
 
     for layer in range(len(mountains)):
         # Convert the heights into the list of points of a polygon
@@ -76,8 +81,8 @@ def draw_mountains(image, mountains, imageWidth, imageHeight, color):
         points = np.array(points, np.int32)
         points = points.reshape((-1,1,2))
 
-        square = np.array([[10,10], [10,100], [100,100], [100, 10], [10, 10]], np.int32)
-        square = square.reshape((-1,1,2))
+        # square = np.array([[10,10], [10,100], [100,100], [100, 10], [10, 10]], np.int32)
+        # square = square.reshape((-1,1,2))
         # layer_color = len(color)>1: color[layer%2] % 
         if len(color) > 1:
             layer_color = color[layer%2]
@@ -86,6 +91,10 @@ def draw_mountains(image, mountains, imageWidth, imageHeight, color):
             initial_color[3] = initial_color[3] / (len(mountains)) * (layer+1)
             layer_color = tuple(initial_color)
         cv2.fillPoly(image,[points],layer_color)
+
+        if white_contour:
+            cv2.polylines(image,[points],True,(255,255,255,255),2)
+
 
     return image
 
@@ -105,6 +114,20 @@ def smooth_mountains(mountains, smooth_value):
     return smoothed_mountains
 
 
+def draw_margin(image, margin, width, height):
+    mask = np.zeros((height, width, 4), np.uint8)
+    out = np.ones((height, width, 4), np.uint8) * 255
+    mask[:,:,3] = 255
+    if margin == "Circle":
+        radius = math.floor(min(width, height)/2) - 30
+        center = (math.floor(width/2), math.floor(height/2))
+        cv2.circle(mask, center, radius, (255, 255, 255, 255), thickness=-1)
+
+        out[mask == 255] = image[mask == 255]
+
+    return out
+
+
 class Window(QtWidgets.QMainWindow):
     def __init__(self):
         super().__init__()
@@ -117,6 +140,7 @@ class Window(QtWidgets.QMainWindow):
         self.__center_y = 100
         self.__mountain_layers = 3
         self.__roughness = 100
+        self.__decrease_roughness = 2
         self.__mountains = []
         self.__upper_padding = 100
         self.__lower_padding = 100
@@ -124,6 +148,8 @@ class Window(QtWidgets.QMainWindow):
         self.__smoothed_mountains = []
         self.__smooth = 0
         self.__color_palette = "Terracotta"
+        self.__white_contour = 0
+        self.__margin = "None"
 
         # Sun Radius Slider
         self.__sun_radius_slider = QtWidgets.QSlider(QtCore.Qt.Horizontal)
@@ -147,16 +173,28 @@ class Window(QtWidgets.QMainWindow):
         center_y_slider.valueChanged[int].connect(self.on_center_y_changed)
 
         # Generate Mountains
+        # Mountain Layers
         self.__mountain_layers_edit = QtWidgets.QLineEdit(str(self.__mountain_layers))
         self.__mountain_layers_edit.setFixedWidth(69)
+        # Roughness
         self.__roughness_edit = QtWidgets.QLineEdit(str(self.__roughness))
         self.__roughness_edit.setFixedWidth(69)
+        # Decrease roughness
+        decrease_roughness_checkbox = QtWidgets.QCheckBox('Decrease roughness')
+        decrease_roughness_checkbox.setCheckState(self.__decrease_roughness)
+        decrease_roughness_checkbox.stateChanged[int].connect(
+            self.on_decrease_roughness_changed)
+        # Generate Mountains Button
         self.__generate_mountains_button = QtWidgets.QPushButton('Generate Mountains');
         self.__generate_mountains_button.clicked.connect(
             self.on_generate_mountains_button_clicked)
+        # Generate Mountains Layout
         generate_mountains_layout = QtWidgets.QHBoxLayout()
+        generate_mountains_layout.addWidget(QtWidgets.QLabel('Mountain Layers'))
         generate_mountains_layout.addWidget(self.__mountain_layers_edit)
+        generate_mountains_layout.addWidget(QtWidgets.QLabel('Roughness'))
         generate_mountains_layout.addWidget(self.__roughness_edit)
+        generate_mountains_layout.addWidget(decrease_roughness_checkbox)
         generate_mountains_layout.addWidget(self.__generate_mountains_button)
 
         # Upper padding
@@ -191,13 +229,30 @@ class Window(QtWidgets.QMainWindow):
         # color_palette_combobox = self.__create_combobox(COLOR_PALETTES.keys())
         self.__color_palette_combobox = QtWidgets.QComboBox()
         self.__color_palette_combobox.addItems(COLOR_PALETTES.keys())
-        self.__currentIndex = list(COLOR_PALETTES.keys()).index(self.__color_palette)
-        self.__color_palette_combobox.setCurrentIndex(self.__currentIndex)
+        self.__currentPaletteIndex = list(COLOR_PALETTES.keys()).index(self.__color_palette)
+        self.__color_palette_combobox.setCurrentIndex(self.__currentPaletteIndex)
         self.__color_palette_combobox.currentIndexChanged[int].connect(
             self.on_color_palette_changed)
         self.__color_palette_layout = QtWidgets.QHBoxLayout()
         self.__color_palette_layout.addWidget(self.__color_palette_combobox)
 
+        # White Contour
+        white_contour_checkbox = QtWidgets.QCheckBox('White Contour')
+        white_contour_checkbox.setCheckState(self.__white_contour)
+        white_contour_checkbox.stateChanged[int].connect(
+            self.on_white_contour_changed)
+
+
+        # Margin
+        self.__margin_combobox = QtWidgets.QComboBox()
+        self.__margin_combobox.addItems(MARGIN_OPTIONS)
+        self.__currentMarginIndex = 0
+        self.__margin_combobox.setCurrentIndex(self.__currentMarginIndex)
+        self.__margin_combobox.currentIndexChanged[int].connect(
+            self.on_margin_changed)
+        self.__margin_layout = QtWidgets.QHBoxLayout()
+        self.__margin_layout.addWidget(QtWidgets.QLabel("Margin"))
+        self.__margin_layout.addWidget(self.__margin_combobox)
 
         # Parameters Layout
         parameters_layout = QtWidgets.QVBoxLayout()
@@ -218,6 +273,8 @@ class Window(QtWidgets.QMainWindow):
         parameters_layout.addWidget(self.__smooth_slider)
         parameters_layout.addWidget(QtWidgets.QLabel("Color Palette"))
         parameters_layout.addLayout(self.__color_palette_layout)
+        parameters_layout.addWidget(white_contour_checkbox)
+        parameters_layout.addLayout(self.__margin_layout)
 
 
         # Image
@@ -264,10 +321,16 @@ class Window(QtWidgets.QMainWindow):
         self.__update()
 
 
+    def on_decrease_roughness_changed(self, value):
+        self.__decrease_roughness = value
+        self.__update()
+
+
     def on_generate_mountains_button_clicked(self):
         self.__mountains = generate_mountains(self.__image, 
                                           int(self.__mountain_layers_edit.text()), 
-                                          int(self.__roughness_edit.text()))
+                                          int(self.__roughness_edit.text()),
+                                          self.__decrease_roughness)
         self.__smooth = 0
         self.__smooth_slider.setValue(0)
         self.__update()
@@ -302,8 +365,19 @@ class Window(QtWidgets.QMainWindow):
 
 
     def on_color_palette_changed(self, value):
-        self.__currentIndex = value
-        self.__color_palette = list(COLOR_PALETTES.keys())[self.__currentIndex]
+        self.__currentPaletteIndex = value
+        self.__color_palette = list(COLOR_PALETTES.keys())[self.__currentPaletteIndex]
+        self.__update()
+
+
+    def on_white_contour_changed(self, value):
+        self.__white_contour = value
+        self.__update()
+
+
+    def on_margin_changed(self, value):
+        self.__currentMarginIndex = value
+        self.__margin = MARGIN_OPTIONS[self.__currentMarginIndex]
         self.__update()
 
 
@@ -312,13 +386,17 @@ class Window(QtWidgets.QMainWindow):
         # Generate Image
         self.__image = generate_image(WIDTH, HEIGHT, COLOR_PALETTES[self.__color_palette]["sky"])
         self.__image = draw_sun(self.__image, self.__sun_radius, self. __center_x,
-                                      self.__center_y, COLOR_PALETTES[self.__color_palette]["sun"])
+                                      self.__center_y, COLOR_PALETTES[self.__color_palette]["sun"],
+                                      self.__white_contour)
         mountains = self.__smoothed_mountains if self.__smooth else self.__mountains
 
         normalize_mountains(mountains, HEIGHT, self.__lower_padding, self.__upper_padding, self.__mountain_intersection)
 
         self.__image = draw_mountains(self.__image, mountains, WIDTH, HEIGHT,    
-                                      COLOR_PALETTES[self.__color_palette]["land"])
+                                      COLOR_PALETTES[self.__color_palette]["land"], self.__white_contour)
+
+        if not self.__margin == "None":
+            self.__image = draw_margin(self.__image, self.__margin, WIDTH, HEIGHT)
 
         qImage = QtGui.QImage(
             self.__image.data, self.__image.shape[1], self.__image.shape[0],
