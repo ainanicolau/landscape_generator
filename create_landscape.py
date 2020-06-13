@@ -5,6 +5,7 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 import cv2
 import numpy as np
 import math
+from colour import Color
 
 import midpoint_displacement as md
 
@@ -85,7 +86,10 @@ def normalize_mountains(mountains, height, lower_padding, upper_padding, mountai
         mountains[layer] = normalized_layer
 
 
-def draw_mountains(image, mountains, imageWidth, imageHeight, color, white_contour):
+def draw_mountains(image, mountains, imageWidth, imageHeight, color_palette, white_contour):
+
+    if len(color_palette["land"]) == 1:
+        colors = interpolate_colors(color_palette["land"][0], color_palette["sky"],len(mountains)+1)
 
     for layer in range(len(mountains)):
         # Convert the heights into the list of points of a polygon
@@ -98,15 +102,10 @@ def draw_mountains(image, mountains, imageWidth, imageHeight, color, white_conto
         points = np.array(points, np.int32)
         points = points.reshape((-1,1,2))
 
-        # square = np.array([[10,10], [10,100], [100,100], [100, 10], [10, 10]], np.int32)
-        # square = square.reshape((-1,1,2))
-        # layer_color = len(color)>1: color[layer%2] % 
-        if len(color) > 1:
-            layer_color = color[layer%2]
+        if len(color_palette["land"]) > 1:
+            layer_color = color_palette["land"][layer%2]
         else:
-            initial_color = list(color[0])
-            initial_color[3] = initial_color[3] / (len(mountains)) * (layer+1)
-            layer_color = tuple(initial_color)
+            layer_color = colors[len(mountains) - layer - 1]
         cv2.fillPoly(image,[points],layer_color)
 
         if white_contour:
@@ -114,6 +113,17 @@ def draw_mountains(image, mountains, imageWidth, imageHeight, color, white_conto
 
 
     return image
+
+
+def interpolate_colors(color1, color2, divisions):    
+    base_color = Color(rgb=[x/255 for x in color1[0:3]])
+    blend_color = Color(rgb=[x/255 for x in color2[0:3]])
+    colors = list(base_color.range_to(blend_color, divisions))
+    for color_element in range(len(colors)):
+        colors[color_element] = [x*255 for x in colors[color_element].get_rgb()]
+        colors[color_element] += (255,) 
+
+    return colors
 
 
 def smooth_mountains(mountains, smooth_value):
@@ -436,7 +446,7 @@ class Window(QtWidgets.QMainWindow):
         normalize_mountains(mountains, HEIGHT, self.__lower_padding, self.__upper_padding, self.__mountain_intersection)
 
         self.__image = draw_mountains(self.__image, mountains, WIDTH, HEIGHT,    
-                                      COLOR_PALETTES[self.__color_palette]["land"], self.__white_contour)
+                                      COLOR_PALETTES[self.__color_palette], self.__white_contour)
 
         if not self.__margin == "None":
             self.__image = draw_margin(self.__image, self.__margin, WIDTH, HEIGHT)
