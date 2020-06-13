@@ -98,7 +98,6 @@ def draw_mountains(image, mountains, imageWidth, imageHeight, color_palette, whi
         # Add the lower corners of the image to close the polygon
         points.insert(0, [0, imageHeight])
         points.append([imageWidth - 1, imageHeight])
-
         points = np.array(points, np.int32)
         points = points.reshape((-1,1,2))
 
@@ -110,7 +109,6 @@ def draw_mountains(image, mountains, imageWidth, imageHeight, color_palette, whi
 
         if white_contour:
             cv2.polylines(image,[points],True,(255,255,255,255),2)
-
 
     return image
 
@@ -141,9 +139,10 @@ def smooth_mountains(mountains, smooth_value):
     return smoothed_mountains
 
 
-def draw_margin(image, margin, width, height):
+def draw_margin(image, margin, width, height, rgb_color):
     mask = np.zeros((height, width, 4), np.uint8)
-    out = np.ones((height, width, 4), np.uint8) * 255
+    out = np.zeros((height, width, 4), np.uint8)
+    out[:, :] = (rgb_color[2], rgb_color[1], rgb_color[0], 255)
     mask[:,:,3] = 255
     if margin == "Circle":
         radius = math.floor(min(width, height)/2) - 30     
@@ -184,6 +183,7 @@ class Window(QtWidgets.QMainWindow):
         self.__smoothed_mountains = []
         self.__smooth = 0
         self.__color_palette = "Terracotta"
+        self.__background_color = (255,255,255,255)
         self.__white_contour = 0
         self.__margin = "None"
 
@@ -283,6 +283,14 @@ class Window(QtWidgets.QMainWindow):
         self.__color_palette_layout = QtWidgets.QHBoxLayout()
         self.__color_palette_layout.addWidget(self.__color_palette_combobox)
 
+
+        # Background Color
+        # background_color_dialog = QtWidgets.QColorDialog()
+        self.__background_color_button = QtWidgets.QPushButton()
+        self.__background_color_button.setStyleSheet("background-color:rgb{}; border-style: outset; border: none; border-radius: 4px;max-width: 5em;".format(self.__background_color))
+        self.__background_color_button.clicked.connect(
+            self.on_background_color_button_clicked)
+
         # White Contour
         white_contour_checkbox = QtWidgets.QCheckBox('White Contour')
         white_contour_checkbox.setCheckState(self.__white_contour)
@@ -320,6 +328,8 @@ class Window(QtWidgets.QMainWindow):
         parameters_layout.addWidget(self.__smooth_slider)
         parameters_layout.addWidget(QtWidgets.QLabel("Color Palette"))
         parameters_layout.addLayout(self.__color_palette_layout)
+        parameters_layout.addWidget(QtWidgets.QLabel("Background Color"))
+        parameters_layout.addWidget(self.__background_color_button)
         parameters_layout.addWidget(white_contour_checkbox)
         parameters_layout.addLayout(self.__margin_layout)
 
@@ -422,6 +432,12 @@ class Window(QtWidgets.QMainWindow):
         self.__color_palette = list(COLOR_PALETTES.keys())[self.__currentPaletteIndex]
         self.__update()
 
+    def on_background_color_button_clicked(self, value):
+        selected_color = QtWidgets.QColorDialog().getColor()
+        self.__background_color = selected_color.getRgb()
+        self.__background_color_button.setStyleSheet("background-color:rgb{}; border-style: outset; border: none; border-radius: 4px;max-width: 5em;".format(self.__background_color))
+        self.__update()
+
 
     def on_white_contour_changed(self, value):
         self.__white_contour = value
@@ -449,7 +465,7 @@ class Window(QtWidgets.QMainWindow):
                                       COLOR_PALETTES[self.__color_palette], self.__white_contour)
 
         if not self.__margin == "None":
-            self.__image = draw_margin(self.__image, self.__margin, WIDTH, HEIGHT)
+            self.__image = draw_margin(self.__image, self.__margin, WIDTH, HEIGHT, self.__background_color)
 
         # self.__image = cv2.blur(self.__image,(2,2))
 
