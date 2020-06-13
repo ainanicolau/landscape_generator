@@ -36,13 +36,28 @@ def generate_image(width, height, color):
     return image
 
 
-def draw_sun(image, radius, center_x, center_y, color, white_contour):
+def draw_sun(image, radius, center_x, center_y, color, white_contour, sky_element):
     center = (center_x,center_y)
-
     if radius > 0:
-        cv2.circle(image, center, radius, color, thickness=-1, lineType=8, shift=0)
-        if white_contour:
-            cv2.circle(image, center, radius, (255,255,255,255), thickness=2, lineType=8, shift=0)
+        if sky_element == "Sun":
+            cv2.circle(image, center, radius, color, thickness=-1, lineType=8, shift=0)
+            if white_contour:
+                cv2.circle(image, center, radius, (255,255,255,255), thickness=2, lineType=8, shift=0)
+        if sky_element == "Moon":
+            inner_center = (center_x + int(radius/3) ,center_y - int(radius/3))
+            mask = np.zeros((image.shape[0], image.shape[1], 4), np.uint8)
+            filling = mask.copy()
+            filling[:,:] = color
+            cv2.circle(mask, center, radius, (255, 255, 255, 255), thickness=-1)
+            cv2.circle(mask, inner_center, math.floor(radius/1.2), (0, 0, 0, 255), thickness=-1)
+            image[mask == 255] = filling[mask == 255]
+            if white_contour:
+                imgray = cv2.cvtColor(mask, cv2.COLOR_BGR2GRAY)
+                ret, thresh = cv2.threshold(imgray, 127, 255, 0)
+                contours, _ = cv2.findContours(thresh, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+                cv2.drawContours(image, contours, -1, (255,255,255,255), 2)
+
+
     return image
 
 
@@ -145,6 +160,7 @@ class Window(QtWidgets.QMainWindow):
         # self.setCentralWidget(widget)
 
         # Attributes to build the image
+        self.__sky_element = "Sun"
         self.__sun_radius = 0
         self.__center_x = 100
         self.__center_y = 100
@@ -160,6 +176,17 @@ class Window(QtWidgets.QMainWindow):
         self.__color_palette = "Terracotta"
         self.__white_contour = 0
         self.__margin = "None"
+
+        # Sky Element
+        self.__sky_element_combobox = QtWidgets.QComboBox()
+        self.__sky_element_combobox.addItems(SKY_ELEMENT_OPTIONS)
+        self.__currentSkyElementIndex = 0
+        self.__sky_element_combobox.setCurrentIndex(self.__currentSkyElementIndex)
+        self.__sky_element_combobox.currentIndexChanged[int].connect(
+            self.on_sky_element_changed)
+        self.__sky_element_layout = QtWidgets.QHBoxLayout()
+        self.__sky_element_layout.addWidget(QtWidgets.QLabel("Sky Element"))
+        self.__sky_element_layout.addWidget(self.__sky_element_combobox)
 
         # Sun Radius Slider
         self.__sun_radius_slider = QtWidgets.QSlider(QtCore.Qt.Horizontal)
@@ -252,7 +279,6 @@ class Window(QtWidgets.QMainWindow):
         white_contour_checkbox.stateChanged[int].connect(
             self.on_white_contour_changed)
 
-
         # Margin
         self.__margin_combobox = QtWidgets.QComboBox()
         self.__margin_combobox.addItems(MARGIN_OPTIONS)
@@ -266,6 +292,7 @@ class Window(QtWidgets.QMainWindow):
 
         # Parameters Layout
         parameters_layout = QtWidgets.QVBoxLayout()
+        parameters_layout.addLayout(self.__sky_element_layout)
         parameters_layout.addWidget(QtWidgets.QLabel('Sun Radius'))
         parameters_layout.addWidget(self.__sun_radius_slider)
         parameters_layout.addWidget(QtWidgets.QLabel('Center X'))
@@ -310,6 +337,12 @@ class Window(QtWidgets.QMainWindow):
         self.setWindowTitle('Landscape')
 
 
+    def on_sky_element_changed(self, value):
+        self.__currentSkyElementIndex = value
+        self.__sky_element = SKY_ELEMENT_OPTIONS[self.__currentSkyElementIndex]
+        self.__update()
+
+
     def on_sun_radius_changed(self, value):
         # normalized_value = value / 100
         # if normalized_value > self.__sun_radius:
@@ -317,14 +350,14 @@ class Window(QtWidgets.QMainWindow):
         #     self.__sun_radius_slider.setValue(value)
         #     return
         self.__sun_radius = value
-
-
         #normalized_value
         self.__update()
+
 
     def on_center_x_changed(self, value):
         self.__center_x = value
         self.__update()
+
 
     def on_center_y_changed(self, value):
         self.__center_y = value
@@ -397,7 +430,7 @@ class Window(QtWidgets.QMainWindow):
         self.__image = generate_image(WIDTH, HEIGHT, COLOR_PALETTES[self.__color_palette]["sky"])
         self.__image = draw_sun(self.__image, self.__sun_radius, self. __center_x,
                                       self.__center_y, COLOR_PALETTES[self.__color_palette]["sun"],
-                                      self.__white_contour)
+                                      self.__white_contour, self.__sky_element)
         mountains = self.__smoothed_mountains if self.__smooth else self.__mountains
 
         normalize_mountains(mountains, HEIGHT, self.__lower_padding, self.__upper_padding, self.__mountain_intersection)
@@ -407,6 +440,8 @@ class Window(QtWidgets.QMainWindow):
 
         if not self.__margin == "None":
             self.__image = draw_margin(self.__image, self.__margin, WIDTH, HEIGHT)
+
+        # self.__image = cv2.blur(self.__image,(2,2))
 
         qImage = QtGui.QImage(
             self.__image.data, self.__image.shape[1], self.__image.shape[0],
