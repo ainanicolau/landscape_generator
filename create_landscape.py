@@ -6,6 +6,7 @@ import cv2
 import numpy as np
 import math
 from colour import Color
+from PIL import Image
 
 import midpoint_displacement as md
 
@@ -26,7 +27,7 @@ MARGIN_OPTIONS = ["None", "Circle", "Window"]
 
 SKY_ELEMENT_OPTIONS = ["Sun", "Moon"]
 # Texture files
-TEX = "paper.png"
+TEX = "paint.jpg"
 
 
 def generate_image(width, height, color):
@@ -137,6 +138,21 @@ def smooth_mountains(mountains, smooth_value):
         smoothed_mountains.append(smoothed_layer)
 
     return smoothed_mountains
+
+
+def apply_texture(image, texture, alpha):
+
+    out = np.ones(image.shape, np.uint8)*255
+    texture = cv2.imread(texture)
+    texture = cv2.resize(texture, image.shape[1::-1])
+    mask = cv2.cvtColor(texture, cv2.COLOR_BGR2GRAY)
+    mask = mask / 255
+    
+    for channel in range(3):
+        mat = image[:,:,channel] * (1 - mask) + out[:,:,channel] * mask
+        out[:,:,channel] = mat.astype(int)
+
+    return out
 
 
 def draw_margin(image, margin, width, height):
@@ -541,10 +557,13 @@ class Window(QtWidgets.QMainWindow):
         self.__image = draw_mountains(self.__image, mountains, WIDTH, HEIGHT,    
                                       self.__land_color, self.__sky_color, self.__white_contour)
 
+        self.__image = apply_texture(self.__image, TEX, 0.5)
+
         if not self.__margin == "None":
             self.__image = draw_margin(self.__image, self.__margin, WIDTH, HEIGHT)
 
         # self.__image = cv2.blur(self.__image,(2,2))
+        # self.__image = cv2.resize(self.__image,None, interpolation = cv2.INTER_LINEAR)
 
         qImage = QtGui.QImage(
             self.__image.data, self.__image.shape[1], self.__image.shape[0],
