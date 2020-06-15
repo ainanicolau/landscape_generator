@@ -17,11 +17,32 @@ IMAGE_PADDING = 50
 
 # Color Palettes
 COLOR_PALETTES = { "Terracotta":{"sun":(60, 83, 147, 255), "sky":(163, 196, 220, 255),
-                   "land":[(106, 122, 171, 255), (25, 34, 44, 255)]},
+                   "land":[(106, 122, 171, 255), (100, 100, 100, 255), (25, 34, 44, 255)]},
                    "Desert":{"sun":(125, 187, 227, 255), "sky":(175, 206, 229, 255),
                    "land":[(44, 67, 129, 255)]},
                    "Retro":{"sun":(201, 222, 237, 255), "sky":(210, 182, 88, 255),
-                   "land":[(50, 59, 222, 255), (26, 138, 232, 255)]}}
+                   "land":[(50, 59, 222, 255), (38, 87, 228, 255), (26, 138, 232, 255), (60, 166, 237, 255)]},
+                   "Candy":{"sun":(194, 176, 187, 255), "sky":(169, 143, 209, 255),
+                   "land":[(55, 96, 168, 255), (102, 138, 215,255), (144, 170, 206, 255) ,(93, 104, 214, 255), (84, 82, 189, 255)]},
+                   "Gold":{"sun":(38, 128, 181, 255), "sky":(179, 201, 206, 255),
+                   "land":[(26, 19, 76, 255), (15, 60, 133, 255), (101, 124, 180, 255)]},
+                   "Night":{"sun":(239, 249, 237, 255), "sky":(30, 25, 27, 255),
+                   "land":[(149, 140, 142, 255), (207, 220, 246,255), (54, 56, 66, 255) ,(138, 150, 206, 255), (240, 245, 248, 255), (207, 215, 186,255)]},
+                   "Forest":{"sun":(161, 243, 225, 255), "sky":(148, 230, 201, 255),
+                   "land":[(37, 30, 15, 255)]},
+                   "Vintage":{"sun":(171, 189, 220, 255), "sky":(71, 63, 63, 255),
+                   "land":[(40, 150, 222, 255), (171, 189, 220, 255), (44, 58, 52, 255) ,(103, 141, 173, 255), (37, 94, 176, 255)]},
+                   "Peach":{"sun":(106, 141, 210, 255), "sky":(226, 235, 244, 255),
+                   "land":[(147, 183, 217, 255), (118, 136, 190, 255), (106, 141, 210, 255), (110, 125, 169, 255)]},
+                   "Summer":{"sun":(75, 119, 214, 255), "sky":(237, 242, 245, 255),
+                   "land":[(147, 166, 87, 255)]},
+                   "Ocean":{"sun":(100, 169, 195, 255), "sky":(226, 231, 235, 255),
+                   "land":[(58, 36, 23, 255), (82, 81, 40, 255), (196, 213, 195, 255), (147, 166, 87, 255)]},
+                   "Aubergine":{"sun":(70, 30, 126, 255), "sky":(114, 172, 229, 255),
+                   "land":[(200, 149, 138, 255), (240, 240, 240, 255), (67, 35, 92, 255), (30, 30, 30, 255)]},
+                   "Ivy":{"sun":(151, 166, 178, 255), "sky":(240, 240, 240, 255),
+                   "land":[(181, 186, 146, 255), (116, 37, 140, 255), (80, 120, 169, 255), (90, 113, 108, 255)]},
+                   }
 
 MARGIN_OPTIONS = ["None", "Circle", "Window"]
 
@@ -103,7 +124,7 @@ def draw_mountains(image, mountains, imageWidth, imageHeight, mountain_color, sk
         points = points.reshape((-1,1,2))
 
         if len(mountain_color) > 1:
-            layer_color = mountain_color[layer%2]
+            layer_color = mountain_color[layer%len(mountain_color)]
         else:
             layer_color = colors[len(mountains) - layer - 1]
         cv2.fillPoly(image,[points],layer_color)
@@ -197,7 +218,7 @@ class Window(QtWidgets.QMainWindow):
         self.__mountain_intersection = 0
         self.__smoothed_mountains = []
         self.__smooth = 0
-        self.__color_palette = "Terracotta"
+        self.__color_palette = "Desert"
         self.__sky_color = COLOR_PALETTES[self.__color_palette]["sky"]
         self.__sun_color = COLOR_PALETTES[self.__color_palette]["sun"]
         self.__gradient_color = COLOR_PALETTES[self.__color_palette]["land"][0]
