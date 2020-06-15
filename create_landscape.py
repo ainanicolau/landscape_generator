@@ -201,8 +201,6 @@ def draw_margin(image, margin, width, height):
 class Window(QtWidgets.QMainWindow):
     def __init__(self):
         super().__init__()
-        # widget = QtWidgets.QLabel("holi")
-        # self.setCentralWidget(widget)
 
         # Attributes to build the image
         self.__sky_element = "Sun"
@@ -226,6 +224,12 @@ class Window(QtWidgets.QMainWindow):
         self.__white_contour = 0
         self.__margin = "None"
 
+        # Sky Element Group
+        sky_element_group = QtWidgets.QGroupBox()
+        sky_element_group.setTitle('Sky Element')
+        self.__sky_element_layout = QtWidgets.QHBoxLayout()
+        self.__sky_element_center_layout = QtWidgets.QHBoxLayout()
+
         # Sky Element
         self.__sky_element_combobox = QtWidgets.QComboBox()
         self.__sky_element_combobox.addItems(SKY_ELEMENT_OPTIONS)
@@ -233,8 +237,7 @@ class Window(QtWidgets.QMainWindow):
         self.__sky_element_combobox.setCurrentIndex(self.__currentSkyElementIndex)
         self.__sky_element_combobox.currentIndexChanged[int].connect(
             self.on_sky_element_changed)
-        self.__sky_element_layout = QtWidgets.QHBoxLayout()
-        self.__sky_element_layout.addWidget(QtWidgets.QLabel("Sky Element"))
+        self.__sky_element_layout.addWidget(QtWidgets.QLabel('Shape'))
         self.__sky_element_layout.addWidget(self.__sky_element_combobox)
 
         # Sun Radius Slider
@@ -243,6 +246,8 @@ class Window(QtWidgets.QMainWindow):
         self.__sun_radius_slider.setMaximum(WIDTH)
         self.__sun_radius_slider.setValue(int(self.__sun_radius))
         self.__sun_radius_slider.valueChanged[int].connect(self.on_sun_radius_changed)
+        self.__sky_element_layout.addWidget(QtWidgets.QLabel('Radius'))
+        self.__sky_element_layout.addWidget(self.__sun_radius_slider)
 
         # Center X Slider
         center_x_slider = QtWidgets.QSlider(QtCore.Qt.Horizontal)
@@ -250,6 +255,9 @@ class Window(QtWidgets.QMainWindow):
         center_x_slider.setMaximum(420)
         center_x_slider.setValue(int(self.__center_x))
         center_x_slider.valueChanged[int].connect(self.on_center_x_changed)
+        self.__sky_element_center_layout.addWidget(QtWidgets.QLabel('Center'))
+        self.__sky_element_center_layout.addWidget(QtWidgets.QLabel('X'))
+        self.__sky_element_center_layout.addWidget(center_x_slider)
 
         # Center Y Slider
         center_y_slider = QtWidgets.QSlider(QtCore.Qt.Horizontal)
@@ -257,6 +265,14 @@ class Window(QtWidgets.QMainWindow):
         center_y_slider.setMaximum(595)
         center_y_slider.setValue(int(self.__center_y))
         center_y_slider.valueChanged[int].connect(self.on_center_y_changed)
+        self.__sky_element_center_layout.addWidget(QtWidgets.QLabel('Y'))
+        self.__sky_element_center_layout.addWidget(center_y_slider)
+
+        self.__sky_element_v_layout = QtWidgets.QVBoxLayout()
+        self.__sky_element_v_layout.addLayout(self.__sky_element_layout)
+        self.__sky_element_v_layout.addLayout(self.__sky_element_center_layout)
+
+        sky_element_group.setLayout(self.__sky_element_v_layout)
 
         # Generate Mountains
         # Mountain Layers
@@ -376,13 +392,7 @@ class Window(QtWidgets.QMainWindow):
 
         # Parameters Layout
         parameters_layout = QtWidgets.QVBoxLayout()
-        parameters_layout.addLayout(self.__sky_element_layout)
-        parameters_layout.addWidget(QtWidgets.QLabel('Sun Radius'))
-        parameters_layout.addWidget(self.__sun_radius_slider)
-        parameters_layout.addWidget(QtWidgets.QLabel('Center X'))
-        parameters_layout.addWidget(center_x_slider)
-        parameters_layout.addWidget(QtWidgets.QLabel('Center Y'))
-        parameters_layout.addWidget(center_y_slider)
+        parameters_layout.addWidget(sky_element_group)
         parameters_layout.addLayout(generate_mountains_layout)
         parameters_layout.addWidget(QtWidgets.QLabel('Upper Padding'))
         parameters_layout.addWidget(self.__upper_padding_slider)
