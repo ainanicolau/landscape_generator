@@ -255,7 +255,7 @@ class Window(QtWidgets.QMainWindow):
         center_x_slider.setMaximum(420)
         center_x_slider.setValue(int(self.__center_x))
         center_x_slider.valueChanged[int].connect(self.on_center_x_changed)
-        self.__sky_element_center_layout.addWidget(QtWidgets.QLabel('Center'))
+        self.__sky_element_center_layout.addWidget(QtWidgets.QLabel('Center: '))
         self.__sky_element_center_layout.addWidget(QtWidgets.QLabel('X'))
         self.__sky_element_center_layout.addWidget(center_x_slider)
 
@@ -275,6 +275,10 @@ class Window(QtWidgets.QMainWindow):
         sky_element_group.setLayout(self.__sky_element_v_layout)
 
         # Generate Mountains
+        # Mountains Group
+        mountain_group = QtWidgets.QGroupBox()
+        mountain_group.setTitle('Mountains')
+        mountains_layout = QtWidgets.QVBoxLayout()
         # Mountain Layers
         self.__mountain_layers_edit = QtWidgets.QLineEdit(str(self.__mountain_layers))
         self.__mountain_layers_edit.setFixedWidth(69)
@@ -292,19 +296,24 @@ class Window(QtWidgets.QMainWindow):
             self.on_generate_mountains_button_clicked)
         # Generate Mountains Layout
         generate_mountains_layout = QtWidgets.QHBoxLayout()
-        generate_mountains_layout.addWidget(QtWidgets.QLabel('Mountain Layers'))
+        generate_mountains_layout.addWidget(QtWidgets.QLabel('Layers'))
         generate_mountains_layout.addWidget(self.__mountain_layers_edit)
         generate_mountains_layout.addWidget(QtWidgets.QLabel('Roughness'))
         generate_mountains_layout.addWidget(self.__roughness_edit)
         generate_mountains_layout.addWidget(decrease_roughness_checkbox)
         generate_mountains_layout.addWidget(self.__generate_mountains_button)
+        mountains_layout.addLayout(generate_mountains_layout)
 
+        padding_layout = QtWidgets.QHBoxLayout()
+        padding_layout.addWidget(QtWidgets.QLabel('Padding: '))
         # Upper padding
         self.__upper_padding_slider = QtWidgets.QSlider(QtCore.Qt.Horizontal)
         self.__upper_padding_slider.setMinimum(0)
         self.__upper_padding_slider.setMaximum(HEIGHT)
         self.__upper_padding_slider.setValue(int(self.__upper_padding))
         self.__upper_padding_slider.valueChanged[int].connect(self.on_upper_padding_changed)
+        padding_layout.addWidget(QtWidgets.QLabel('Upper'))
+        padding_layout.addWidget(self.__upper_padding_slider)
 
         # Lower padding
         self.__lower_padding_slider = QtWidgets.QSlider(QtCore.Qt.Horizontal)
@@ -312,13 +321,20 @@ class Window(QtWidgets.QMainWindow):
         self.__lower_padding_slider.setMaximum(HEIGHT)
         self.__lower_padding_slider.setValue(int(self.__lower_padding))
         self.__lower_padding_slider.valueChanged[int].connect(self.on_lower_padding_changed)
+        padding_layout.addWidget(QtWidgets.QLabel('Lower'))
+        padding_layout.addWidget(self.__lower_padding_slider)
+        mountains_layout.addLayout(padding_layout)
 
+
+        mountain_modifier_layout = QtWidgets.QHBoxLayout()
         # Mountain Intersecion
         self.__mountain_intersection_slider = QtWidgets.QSlider(QtCore.Qt.Horizontal)
         self.__mountain_intersection_slider.setMinimum(0)
         self.__mountain_intersection_slider.setMaximum(100)
         self.__mountain_intersection_slider.setValue(int(self.__mountain_intersection))
         self.__mountain_intersection_slider.valueChanged[int].connect(self.on_mountain_intersection_changed)
+        mountain_modifier_layout.addWidget(QtWidgets.QLabel('Intersecions'))
+        mountain_modifier_layout.addWidget(self.__mountain_intersection_slider)
 
         # Smooth mountains
         self.__smooth_slider = QtWidgets.QSlider(QtCore.Qt.Horizontal)
@@ -326,7 +342,16 @@ class Window(QtWidgets.QMainWindow):
         self.__smooth_slider.setMaximum(100)
         self.__smooth_slider.setValue(int(self.__smooth))
         self.__smooth_slider.valueChanged[int].connect(self.on_smooth_changed)
+        mountain_modifier_layout.addWidget(QtWidgets.QLabel('Smooth'))
+        mountain_modifier_layout.addWidget(self.__smooth_slider)
+        mountains_layout.addLayout(mountain_modifier_layout)
+        mountain_group.setLayout(mountains_layout)
 
+
+        # Colors Group
+        colors_group = QtWidgets.QGroupBox()
+        colors_group.setTitle('Colors')
+        colors_layout = QtWidgets.QVBoxLayout()
         # Color Palette
         # color_palette_combobox = self.__create_combobox(COLOR_PALETTES.keys())
         self.__color_palette_combobox = QtWidgets.QComboBox()
@@ -336,48 +361,68 @@ class Window(QtWidgets.QMainWindow):
         self.__color_palette_combobox.currentIndexChanged[int].connect(
             self.on_color_palette_changed)
         self.__color_palette_layout = QtWidgets.QHBoxLayout()
-        self.__color_palette_layout.addWidget(self.__color_palette_combobox)
+        label = QtWidgets.QLabel("Palette")
+        label.setFixedWidth(60)
+        self.__color_palette_layout.addWidget(label)
+        self.__color_palette_layout.addWidget(self.__color_palette_combobox)#, alignment=QtCore.Qt.AlignLeft)
+
+        # Reset palette
+        self.__reset_palette_button = QtWidgets.QPushButton("Reset Palette")
+        self.__reset_palette_button.clicked.connect(
+            self.on_reset_palette_button_clicked)
+        self.__color_palette_layout.addWidget(self.__reset_palette_button)
+        # self.__color_palette_layout.setMargin(0)
+        colors_layout.addLayout(self.__color_palette_layout)
 
         # Custom Colors
         self.__custom_colors_layout = QtWidgets.QHBoxLayout()
         # Sky Color
         self.__sky_color_button = QtWidgets.QPushButton()
         background = (self.__sky_color[2], self.__sky_color[1], self.__sky_color[0])
-        self.__sky_color_button.setStyleSheet("background-color:rgb{}; border-style: outset; border: none; border-radius: 4px;max-width: 5em;".format(background))
+        self.__sky_color_button.setStyleSheet("background-color:rgb{}; border-style: outset; border: none; border-radius: 4px;".format(background))
         self.__sky_color_button.clicked.connect(
             self.on_sky_color_button_clicked)
-        self.__custom_colors_layout.addWidget(QtWidgets.QLabel("Sky Color"))
+        label = QtWidgets.QLabel("Sky")
+        label.setFixedWidth(30)
+        self.__custom_colors_layout.addWidget(label)
         self.__custom_colors_layout.addWidget(self.__sky_color_button)
 
         # Sun Color
         self.__sun_color_button = QtWidgets.QPushButton()
         background = (self.__sun_color[2], self.__sun_color[1], self.__sun_color[0])
-        self.__sun_color_button.setStyleSheet("background-color:rgb{}; border-style: outset; border: none; border-radius: 4px;max-width: 5em;".format(background))
+        self.__sun_color_button.setStyleSheet("background-color:rgb{}; border-style: outset; border: none; border-radius: 4px;".format(background))
         self.__sun_color_button.clicked.connect(
             self.on_sun_color_button_clicked)
-        self.__custom_colors_layout.addWidget(QtWidgets.QLabel("Sun Color"))
+        label = QtWidgets.QLabel("Sun")
+        label.setFixedWidth(30)
+        self.__custom_colors_layout.addWidget(label)
         self.__custom_colors_layout.addWidget(self.__sun_color_button)
 
         # Mountain Color
         self.__gradient_color_button = QtWidgets.QPushButton()
         background = (self.__gradient_color[2], self.__gradient_color[1], self.__gradient_color[0])
-        self.__gradient_color_button.setStyleSheet("background-color:rgb{}; border-style: outset; border: none; border-radius: 4px;max-width: 5em;".format(background))
+        self.__gradient_color_button.setStyleSheet("background-color:rgb{}; border-style: outset; border: none; border-radius: 4px;".format(background))
         self.__gradient_color_button.clicked.connect(
             self.on_gradient_color_button_clicked)
-        self.__custom_colors_layout.addWidget(QtWidgets.QLabel("Land Color"))
+        label = QtWidgets.QLabel("Land")
+        label.setFixedWidth(30)
+        self.__custom_colors_layout.addWidget(label)
         self.__custom_colors_layout.addWidget(self.__gradient_color_button)
 
-        # Reset palette
-        self.__reset_palette_button = QtWidgets.QPushButton("Reset Palette")
-        self.__reset_palette_button.clicked.connect(
-            self.on_reset_palette_button_clicked)
-        self.__custom_colors_layout.addWidget(self.__reset_palette_button)
+        colors_layout.addLayout(self.__custom_colors_layout)
+        colors_group.setLayout(colors_layout)
+
+        # Details Group
+        details_group = QtWidgets.QGroupBox()
+        details_group.setTitle('Details')
+        details_layout = QtWidgets.QHBoxLayout()
 
         # White Contour
         white_contour_checkbox = QtWidgets.QCheckBox('White Contour')
         white_contour_checkbox.setCheckState(self.__white_contour)
         white_contour_checkbox.stateChanged[int].connect(
             self.on_white_contour_changed)
+        details_layout.addWidget(white_contour_checkbox)
 
         # Margin
         self.__margin_combobox = QtWidgets.QComboBox()
@@ -387,27 +432,19 @@ class Window(QtWidgets.QMainWindow):
         self.__margin_combobox.currentIndexChanged[int].connect(
             self.on_margin_changed)
         self.__margin_layout = QtWidgets.QHBoxLayout()
-        self.__margin_layout.addWidget(QtWidgets.QLabel("Margin"))
+        label = QtWidgets.QLabel("Margin")
+        label.setFixedWidth(60)
+        self.__margin_layout.addWidget(label)
         self.__margin_layout.addWidget(self.__margin_combobox)
+        details_layout.addLayout(self.__margin_layout)
+        details_group.setLayout(details_layout)
 
         # Parameters Layout
         parameters_layout = QtWidgets.QVBoxLayout()
         parameters_layout.addWidget(sky_element_group)
-        parameters_layout.addLayout(generate_mountains_layout)
-        parameters_layout.addWidget(QtWidgets.QLabel('Upper Padding'))
-        parameters_layout.addWidget(self.__upper_padding_slider)
-        parameters_layout.addWidget(QtWidgets.QLabel('Lower Padding'))
-        parameters_layout.addWidget(self.__lower_padding_slider)
-        parameters_layout.addWidget(QtWidgets.QLabel('Mountain Intersecion'))
-        parameters_layout.addWidget(self.__mountain_intersection_slider)
-        parameters_layout.addWidget(QtWidgets.QLabel('Smooth'))
-        parameters_layout.addWidget(self.__smooth_slider)
-        parameters_layout.addWidget(QtWidgets.QLabel("Color Palette"))
-        parameters_layout.addLayout(self.__color_palette_layout)
-        parameters_layout.addLayout(self.__custom_colors_layout)
-        parameters_layout.addWidget(white_contour_checkbox)
-        parameters_layout.addLayout(self.__margin_layout)
-
+        parameters_layout.addWidget(mountain_group)
+        parameters_layout.addWidget(colors_group)
+        parameters_layout.addWidget(details_group)
 
         # Image
         self.__image_frame = QtWidgets.QLabel()
@@ -418,7 +455,6 @@ class Window(QtWidgets.QMainWindow):
             QtGui.QImage.Format_ARGB32)
         self.__image_frame.setPixmap(QtGui.QPixmap.fromImage(qImage))
 
-
         # Main Layout
         layout = QtWidgets.QHBoxLayout()
         layout.addLayout(parameters_layout)
@@ -427,7 +463,6 @@ class Window(QtWidgets.QMainWindow):
         widget = QtWidgets.QWidget()
         widget.setLayout(layout)
         self.setCentralWidget(widget)
-
 
         self.setWindowTitle('Landscape')
 
@@ -507,55 +542,49 @@ class Window(QtWidgets.QMainWindow):
         self.__color_palette = list(COLOR_PALETTES.keys())[self.__currentPaletteIndex]
         self.__sky_color = COLOR_PALETTES[self.__color_palette]["sky"]
         background = (self.__sky_color[2], self.__sky_color[1], self.__sky_color[0])
-        self.__sky_color_button.setStyleSheet("background-color:rgb{}; border-style: outset; border: none; border-radius: 4px;max-width: 5em;".format(background))
+        self.__sky_color_button.setStyleSheet("background-color:rgb{}; border-style: outset; border: none; border-radius: 4px;".format(background))
         self.__sun_color = COLOR_PALETTES[self.__color_palette]["sun"]
         background = (self.__sun_color[2], self.__sun_color[1], self.__sun_color[0])
-        self.__sun_color_button.setStyleSheet("background-color:rgb{}; border-style: outset; border: none; border-radius: 4px;max-width: 5em;".format(background))
+        self.__sun_color_button.setStyleSheet("background-color:rgb{}; border-style: outset; border: none; border-radius: 4px;".format(background))
         self.__gradient_color = COLOR_PALETTES[self.__color_palette]["land"][0]
         background = (self.__gradient_color[2], self.__gradient_color[1], self.__gradient_color[0])
-        self.__gradient_color_button.setStyleSheet("background-color:rgb{}; border-style: outset; border: none; border-radius: 4px;max-width: 5em;".format(background))
+        self.__gradient_color_button.setStyleSheet("background-color:rgb{}; border-style: outset; border: none; border-radius: 4px;".format(background))
         self.__land_color = COLOR_PALETTES[self.__color_palette]["land"]
         self.__update()
 
 
     def on_sky_color_button_clicked(self, value):
         selected_color = QtWidgets.QColorDialog().getColor().getRgb()
-        self.__sky_color_button.setStyleSheet("background-color:rgb{}; border-style: outset; border: none; border-radius: 4px;max-width: 5em;".format(selected_color))
+        self.__sky_color_button.setStyleSheet("background-color:rgb{}; border-style: outset; border: none; border-radius: 4px;".format(selected_color))
         self.__sky_color = (selected_color[2], selected_color[1], selected_color[0], 255)
-        # self.__color_palette = "Custom"
-        # self.__currentPaletteIndex = len(COLOR_PALETTES)
         self.__update()
 
 
     def on_sun_color_button_clicked(self, value):
         selected_color = QtWidgets.QColorDialog().getColor().getRgb()
-        self.__sun_color_button.setStyleSheet("background-color:rgb{}; border-style: outset; border: none; border-radius: 4px;max-width: 5em;".format(selected_color))
+        self.__sun_color_button.setStyleSheet("background-color:rgb{}; border-style: outset; border: none; border-radius: 4px;".format(selected_color))
         self.__sun_color = (selected_color[2], selected_color[1], selected_color[0], 255)
-        # self.__color_palette = "Custom"
-        # self.__currentPaletteIndex = list(COLOR_PALETTES.keys()).index(self.__color_palette)
         self.__update()
 
 
     def on_gradient_color_button_clicked(self, value):
         selected_color = QtWidgets.QColorDialog().getColor().getRgb()
-        self.__gradient_color_button.setStyleSheet("background-color:rgb{}; border-style: outset; border: none; border-radius: 4px;max-width: 5em;".format(selected_color))
+        self.__gradient_color_button.setStyleSheet("background-color:rgb{}; border-style: outset; border: none; border-radius: 4px;".format(selected_color))
         self.__gradient_color = (selected_color[2], selected_color[1], selected_color[0], 255)
         self.__land_color = [self.__gradient_color]
-        # self.__color_palette = "Custom"
-        # self.__currentPaletteIndex = list(COLOR_PALETTES.keys()).index(self.__color_palette)
         self.__update()
 
 
     def on_reset_palette_button_clicked(self, value):
         self.__sky_color = COLOR_PALETTES[self.__color_palette]["sky"]
         background = (self.__sky_color[2], self.__sky_color[1], self.__sky_color[0])
-        self.__sky_color_button.setStyleSheet("background-color:rgb{}; border-style: outset; border: none; border-radius: 4px;max-width: 5em;".format(background))
+        self.__sky_color_button.setStyleSheet("background-color:rgb{}; border-style: outset; border: none; border-radius: 4px;".format(background))
         self.__sun_color = COLOR_PALETTES[self.__color_palette]["sun"]
         background = (self.__sun_color[2], self.__sun_color[1], self.__sun_color[0])
-        self.__sun_color_button.setStyleSheet("background-color:rgb{}; border-style: outset; border: none; border-radius: 4px;max-width: 5em;".format(background))
+        self.__sun_color_button.setStyleSheet("background-color:rgb{}; border-style: outset; border: none; border-radius: 4px;".format(background))
         self.__gradient_color = COLOR_PALETTES[self.__color_palette]["land"][0]
         background = (self.__gradient_color[2], self.__gradient_color[1], self.__gradient_color[0])
-        self.__gradient_color_button.setStyleSheet("background-color:rgb{}; border-style: outset; border: none; border-radius: 4px;max-width: 5em;".format(background))
+        self.__gradient_color_button.setStyleSheet("background-color:rgb{}; border-style: outset; border: none; border-radius: 4px;".format(background))
         self.__land_color = COLOR_PALETTES[self.__color_palette]["land"]
         self.__update()
 
@@ -583,18 +612,15 @@ class Window(QtWidgets.QMainWindow):
 
         normalize_mountains(mountains, HEIGHT, self.__lower_padding, self.__upper_padding, self.__mountain_intersection)
 
-        # self.__image = draw_mountains(self.__image, mountains, WIDTH, HEIGHT,    
-        #                               COLOR_PALETTES[self.__color_palette], self.__white_contour)
         self.__image = draw_mountains(self.__image, mountains, WIDTH, HEIGHT,    
                                       self.__land_color, self.__sky_color, self.__white_contour)
-
-        self.__image = apply_texture(self.__image, TEX, 0.5)
 
         if not self.__margin == "None":
             self.__image = draw_margin(self.__image, self.__margin, WIDTH, HEIGHT)
 
-        # self.__image = cv2.blur(self.__image,(2,2))
-        # self.__image = cv2.resize(self.__image,None, interpolation = cv2.INTER_LINEAR)
+        self.__image = cv2.blur(self.__image,(2,2))
+
+        self.__image = apply_texture(self.__image, TEX, 0.5)
 
         qImage = QtGui.QImage(
             self.__image.data, self.__image.shape[1], self.__image.shape[0],
