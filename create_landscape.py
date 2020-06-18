@@ -13,36 +13,84 @@ import midpoint_displacement as md
 # Image Resolution
 WIDTH = 420
 HEIGHT = 595
-IMAGE_PADDING = 50
 
 # Color Palettes
-COLOR_PALETTES = { "Terracotta":{"sun":(60, 83, 147, 255), "sky":(163, 196, 220, 255),
-                   "land":[(106, 122, 171, 255), (100, 100, 100, 255), (25, 34, 44, 255)]},
-                   "Desert":{"sun":(125, 187, 227, 255), "sky":(175, 206, 229, 255),
-                   "land":[(44, 67, 129, 255)]},
-                   "Retro":{"sun":(201, 222, 237, 255), "sky":(210, 182, 88, 255),
-                   "land":[(50, 59, 222, 255), (38, 87, 228, 255), (26, 138, 232, 255), (60, 166, 237, 255)]},
-                   "Candy":{"sun":(194, 176, 187, 255), "sky":(169, 143, 209, 255),
-                   "land":[(55, 96, 168, 255), (102, 138, 215,255), (144, 170, 206, 255) ,(93, 104, 214, 255), (84, 82, 189, 255)]},
-                   "Gold":{"sun":(38, 128, 181, 255), "sky":(179, 201, 206, 255),
-                   "land":[(26, 19, 76, 255), (15, 60, 133, 255), (101, 124, 180, 255)]},
-                   "Night":{"sun":(239, 249, 237, 255), "sky":(30, 25, 27, 255),
-                   "land":[(149, 140, 142, 255), (207, 220, 246,255), (54, 56, 66, 255) ,(138, 150, 206, 255), (240, 245, 248, 255), (207, 215, 186,255)]},
-                   "Forest":{"sun":(161, 243, 225, 255), "sky":(148, 230, 201, 255),
-                   "land":[(37, 30, 15, 255)]},
-                   "Vintage":{"sun":(171, 189, 220, 255), "sky":(71, 63, 63, 255),
-                   "land":[(40, 150, 222, 255), (171, 189, 220, 255), (44, 58, 52, 255) ,(103, 141, 173, 255), (37, 94, 176, 255)]},
-                   "Peach":{"sun":(106, 141, 210, 255), "sky":(226, 235, 244, 255),
-                   "land":[(147, 183, 217, 255), (118, 136, 190, 255), (106, 141, 210, 255), (110, 125, 169, 255)]},
-                   "Summer":{"sun":(75, 119, 214, 255), "sky":(237, 242, 245, 255),
-                   "land":[(147, 166, 87, 255)]},
-                   "Ocean":{"sun":(100, 169, 195, 255), "sky":(226, 231, 235, 255),
-                   "land":[(58, 36, 23, 255), (82, 81, 40, 255), (196, 213, 195, 255), (147, 166, 87, 255)]},
-                   "Aubergine":{"sun":(70, 30, 126, 255), "sky":(114, 172, 229, 255),
-                   "land":[(200, 149, 138, 255), (240, 240, 240, 255), (67, 35, 92, 255), (30, 30, 30, 255)]},
-                   "Ivy":{"sun":(151, 166, 178, 255), "sky":(240, 240, 240, 255),
-                   "land":[(181, 186, 146, 255), (116, 37, 140, 255), (80, 120, 169, 255), (90, 113, 108, 255)]},
-                   }
+COLOR_PALETTES = {
+    "Terracotta": {
+        "sun": (60, 83, 147, 255),
+        "sky": (163, 196, 220, 255),
+        "land": [(106, 122, 171, 255), (100, 100, 100, 255), (25, 34, 44, 255)]
+    },
+    "Desert": {
+        "sun": (125, 187, 227, 255),
+        "sky": (175, 206, 229, 255),
+        "land": [(44, 67, 129, 255)]
+    },
+    "Retro": {
+        "sun": (201, 222, 237, 255),
+        "sky": (210, 182, 88, 255),
+        "land": [(50, 59, 222, 255), (38, 87, 228, 255), (26, 138, 232, 255),
+                 (60, 166, 237, 255)]
+    },
+    "Candy": {
+        "sun": (194, 176, 187, 255),
+        "sky": (169, 143, 209, 255),
+        "land": [(55, 96, 168, 255), (102, 138, 215, 255),
+                 (144, 170, 206, 255), (93, 104, 214, 255), (84, 82, 189, 255)]
+    },
+    "Gold": {
+        "sun": (38, 128, 181, 255),
+        "sky": (179, 201, 206, 255),
+        "land": [(26, 19, 76, 255), (15, 60, 133, 255), (101, 124, 180, 255)]
+    },
+    "Night": {
+        "sun": (239, 249, 237, 255),
+        "sky": (30, 25, 27, 255),
+        "land": [(149, 140, 142, 255), (207, 220, 246, 255), (54, 56, 66, 255),
+                 (138, 150, 206, 255), (240, 245, 248, 255),
+                 (207, 215, 186, 255)]
+    },
+    "Forest": {
+        "sun": (161, 243, 225, 255),
+        "sky": (148, 230, 201, 255),
+        "land": [(37, 30, 15, 255)]
+    },
+    "Vintage": {
+        "sun": (171, 189, 220, 255),
+        "sky": (71, 63, 63, 255),
+        "land": [(40, 150, 222, 255), (171, 189, 220, 255), (44, 58, 52, 255),
+                 (103, 141, 173, 255), (37, 94, 176, 255)]
+    },
+    "Peach": {
+        "sun": (106, 141, 210, 255),
+        "sky": (226, 235, 244, 255),
+        "land": [(147, 183, 217, 255), (118, 136, 190, 255),
+                 (106, 141, 210, 255), (110, 125, 169, 255)]
+    },
+    "Summer": {
+        "sun": (75, 119, 214, 255),
+        "sky": (237, 242, 245, 255),
+        "land": [(147, 166, 87, 255)]
+    },
+    "Ocean": {
+        "sun": (100, 169, 195, 255),
+        "sky": (226, 231, 235, 255),
+        "land": [(58, 36, 23, 255), (82, 81, 40, 255), (196, 213, 195, 255),
+                 (147, 166, 87, 255)]
+    },
+    "Aubergine": {
+        "sun": (70, 30, 126, 255),
+        "sky": (114, 172, 229, 255),
+        "land": [(200, 149, 138, 255), (240, 240, 240, 255), (67, 35, 92, 255),
+                 (30, 30, 30, 255)]
+    },
+    "Ivy": {
+        "sun": (151, 166, 178, 255),
+        "sky": (240, 240, 240, 255),
+        "land": [(181, 186, 146, 255), (116, 37, 140, 255),
+                 (80, 120, 169, 255), (90, 113, 108, 255)]
+    },
+}
 
 MARGIN_OPTIONS = ["None", "Circle", "Window"]
 
@@ -59,27 +107,33 @@ def generate_image(width, height, color):
     return image
 
 
-def draw_sun(image, radius, center_x, center_y, color, white_contour, sky_element):
-    center = (center_x,center_y)
+def draw_sun(image, radius, center_x, center_y, color, white_contour,
+             sky_element):
+    center = (center_x, center_y)
     if radius > 0:
         if sky_element == "Sun":
-            cv2.circle(image, center, radius, color, thickness=-1, lineType=8, shift=0)
+            cv2.circle(image, center, radius, color, thickness=-1, lineType=8,
+                       shift=0)
             if white_contour:
-                cv2.circle(image, center, radius, (255,255,255,255), thickness=2, lineType=8, shift=0)
+                cv2.circle(image, center, radius, (255, 255, 255, 255),
+                           thickness=2, lineType=8, shift=0)
         if sky_element == "Moon":
-            inner_center = (center_x + int(radius/3) ,center_y - int(radius/3))
+            inner_center = (center_x + int(radius / 3),
+                            center_y - int(radius / 3))
             mask = np.zeros((image.shape[0], image.shape[1], 4), np.uint8)
             filling = mask.copy()
-            filling[:,:] = color
-            cv2.circle(mask, center, radius, (255, 255, 255, 255), thickness=-1)
-            cv2.circle(mask, inner_center, math.floor(radius/1.2), (0, 0, 0, 255), thickness=-1)
+            filling[:, :] = color
+            cv2.circle(mask, center, radius, (255, 255, 255, 255),
+                       thickness=-1)
+            cv2.circle(mask, inner_center, math.floor(radius / 1.2),
+                       (0, 0, 0, 255), thickness=-1)
             image[mask == 255] = filling[mask == 255]
             if white_contour:
                 imgray = cv2.cvtColor(mask, cv2.COLOR_BGR2GRAY)
                 ret, thresh = cv2.threshold(imgray, 127, 255, 0)
-                contours, _ = cv2.findContours(thresh, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
-                cv2.drawContours(image, contours, -1, (255,255,255,255), 2)
-
+                contours, _ = cv2.findContours(thresh, cv2.RETR_TREE,
+                                               cv2.CHAIN_APPROX_SIMPLE)
+                cv2.drawContours(image, contours, -1, (255, 255, 255, 255), 2)
 
     return image
 
@@ -97,21 +151,27 @@ def generate_mountains(image, num_layers, roughness, decrease_roughness):
     return mountains
 
 
-def normalize_mountains(mountains, height, lower_padding, upper_padding, mountain_intersection):
+def normalize_mountains(mountains, height, lower_padding, upper_padding,
+                        mountain_intersection):
     num_layers = len(mountains)
     for layer in range(num_layers):
         layer_heights = mountains[layer]
-        normalized_layer = md.normalize(layer_heights, 
-                                       (height - lower_padding - upper_padding)/num_layers * layer + upper_padding,
-                                        height - lower_padding - ((height - lower_padding -upper_padding)/num_layers * (num_layers-layer-1)) * mountain_intersection/100) 
+        normalized_layer = md.normalize(
+            layer_heights,
+            (height - lower_padding - upper_padding) / num_layers * layer +
+            upper_padding, height - lower_padding -
+            ((height - lower_padding - upper_padding) / num_layers *
+             (num_layers - layer - 1)) * mountain_intersection / 100)
 
         mountains[layer] = normalized_layer
 
 
-def draw_mountains(image, mountains, imageWidth, imageHeight, mountain_color, sky_color, white_contour):
+def draw_mountains(image, mountains, imageWidth, imageHeight, mountain_color,
+                   sky_color, white_contour):
 
     # if len(mountain_color) == 1:
-    colors = interpolate_colors(mountain_color[0], sky_color,len(mountains)+1)
+    colors = interpolate_colors(mountain_color[0], sky_color,
+                                len(mountains) + 1)
 
     for layer in range(len(mountains)):
         # Convert the heights into the list of points of a polygon
@@ -121,28 +181,28 @@ def draw_mountains(image, mountains, imageWidth, imageHeight, mountain_color, sk
         points.insert(0, [0, imageHeight])
         points.append([imageWidth - 1, imageHeight])
         points = np.array(points, np.int32)
-        points = points.reshape((-1,1,2))
+        points = points.reshape((-1, 1, 2))
 
         if len(mountain_color) > 1:
-            layer_color = mountain_color[layer%len(mountain_color)]
+            layer_color = mountain_color[layer % len(mountain_color)]
         else:
             layer_color = colors[len(mountains) - layer - 1]
-        cv2.fillPoly(image,[points],layer_color)
+        cv2.fillPoly(image, [points], layer_color)
 
         if white_contour:
-            cv2.polylines(image,[points],True,(255,255,255,255),2)
+            cv2.polylines(image, [points], True, (255, 255, 255, 255), 2)
 
     return image
 
 
 def interpolate_colors(color1, color2, divisions):
-    colors = [] 
+    colors = []
     for channel in range(3):
         values = np.linspace(color1[channel], color2[channel], divisions)
-        colors.append([ int(x) for x in values ])
-    colors.append([255]*divisions)
+        colors.append([int(x) for x in values])
+    colors.append([255] * divisions)
 
-    colors=list(map(tuple, zip(*colors)))
+    colors = list(map(tuple, zip(*colors)))
     return colors
 
 
@@ -163,35 +223,36 @@ def smooth_mountains(mountains, smooth_value):
 
 def apply_texture(image, texture, alpha):
 
-    out = np.ones(image.shape, np.uint8)*255
+    out = np.ones(image.shape, np.uint8) * 255
     texture = cv2.imread(texture)
     texture = cv2.resize(texture, image.shape[1::-1])
     mask = cv2.cvtColor(texture, cv2.COLOR_BGR2GRAY)
     mask = mask / 255
-    
+
     for channel in range(3):
-        mat = image[:,:,channel] * (1 - mask) + out[:,:,channel] * mask
-        out[:,:,channel] = mat.astype(int)
+        mat = image[:, :, channel] * (1 - mask) + out[:, :, channel] * mask
+        out[:, :, channel] = mat.astype(int)
 
     return out
 
 
 def draw_margin(image, margin, width, height):
     mask = np.zeros((height, width, 4), np.uint8)
-    out = np.ones((height, width, 4), np.uint8)*255
-    mask[:,:,3] = 255
+    out = np.ones((height, width, 4), np.uint8) * 255
+    mask[:, :, 3] = 255
     if margin == "Circle":
-        radius = math.floor(min(width, height)/2) - 30     
-        center = (math.floor(width/2), math.floor(height/2))
+        radius = math.floor(min(width, height) / 2) - 30
+        center = (math.floor(width / 2), math.floor(height / 2))
         cv2.circle(mask, center, radius, (255, 255, 255, 255), thickness=-1)
 
     if margin == "Window":
-        radius = math.floor(min(width, height)/2) - 50
-        center = (math.floor(width/2), math.floor(height/2) - 50)
+        radius = math.floor(min(width, height) / 2) - 50
+        center = (math.floor(width / 2), math.floor(height / 2) - 50)
         cv2.circle(mask, center, radius, (255, 255, 255, 255), thickness=-1)
         top_left = (center[0] - radius, center[1])
-        bottom_right = (center[0] + radius, center[1] + math.floor(radius * 1.5))
-        cv2.rectangle(mask,top_left,bottom_right,(255, 255, 255, 255),-1)
+        bottom_right = (center[0] + radius,
+                        center[1] + math.floor(radius * 1.5))
+        cv2.rectangle(mask, top_left, bottom_right, (255, 255, 255, 255), -1)
 
     out[mask == 255] = image[mask == 255]
 
@@ -234,7 +295,8 @@ class Window(QtWidgets.QMainWindow):
         self.__sky_element_combobox = QtWidgets.QComboBox()
         self.__sky_element_combobox.addItems(SKY_ELEMENT_OPTIONS)
         self.__currentSkyElementIndex = 0
-        self.__sky_element_combobox.setCurrentIndex(self.__currentSkyElementIndex)
+        self.__sky_element_combobox.setCurrentIndex(
+            self.__currentSkyElementIndex)
         self.__sky_element_combobox.currentIndexChanged[int].connect(
             self.on_sky_element_changed)
         self.__sky_element_layout.addWidget(QtWidgets.QLabel('Shape'))
@@ -245,7 +307,8 @@ class Window(QtWidgets.QMainWindow):
         self.__sun_radius_slider.setMinimum(0)
         self.__sun_radius_slider.setMaximum(WIDTH)
         self.__sun_radius_slider.setValue(int(self.__sun_radius))
-        self.__sun_radius_slider.valueChanged[int].connect(self.on_sun_radius_changed)
+        self.__sun_radius_slider.valueChanged[int].connect(
+            self.on_sun_radius_changed)
         self.__sky_element_layout.addWidget(QtWidgets.QLabel('Radius'))
         self.__sky_element_layout.addWidget(self.__sun_radius_slider)
 
@@ -255,7 +318,8 @@ class Window(QtWidgets.QMainWindow):
         center_x_slider.setMaximum(420)
         center_x_slider.setValue(int(self.__center_x))
         center_x_slider.valueChanged[int].connect(self.on_center_x_changed)
-        self.__sky_element_center_layout.addWidget(QtWidgets.QLabel('Center: '))
+        self.__sky_element_center_layout.addWidget(
+            QtWidgets.QLabel('Center: '))
         self.__sky_element_center_layout.addWidget(QtWidgets.QLabel('X'))
         self.__sky_element_center_layout.addWidget(center_x_slider)
 
@@ -280,7 +344,8 @@ class Window(QtWidgets.QMainWindow):
         mountain_group.setTitle('Mountains')
         mountains_layout = QtWidgets.QVBoxLayout()
         # Mountain Layers
-        self.__mountain_layers_edit = QtWidgets.QLineEdit(str(self.__mountain_layers))
+        self.__mountain_layers_edit = QtWidgets.QLineEdit(
+            str(self.__mountain_layers))
         self.__mountain_layers_edit.setFixedWidth(69)
         # Roughness
         self.__roughness_edit = QtWidgets.QLineEdit(str(self.__roughness))
@@ -291,7 +356,8 @@ class Window(QtWidgets.QMainWindow):
         decrease_roughness_checkbox.stateChanged[int].connect(
             self.on_decrease_roughness_changed)
         # Generate Mountains Button
-        self.__generate_mountains_button = QtWidgets.QPushButton('Generate Mountains');
+        self.__generate_mountains_button = QtWidgets.QPushButton(
+            'Generate Mountains')
         self.__generate_mountains_button.clicked.connect(
             self.on_generate_mountains_button_clicked)
         # Generate Mountains Layout
@@ -311,7 +377,8 @@ class Window(QtWidgets.QMainWindow):
         self.__upper_padding_slider.setMinimum(0)
         self.__upper_padding_slider.setMaximum(HEIGHT)
         self.__upper_padding_slider.setValue(int(self.__upper_padding))
-        self.__upper_padding_slider.valueChanged[int].connect(self.on_upper_padding_changed)
+        self.__upper_padding_slider.valueChanged[int].connect(
+            self.on_upper_padding_changed)
         padding_layout.addWidget(QtWidgets.QLabel('Upper'))
         padding_layout.addWidget(self.__upper_padding_slider)
 
@@ -320,19 +387,22 @@ class Window(QtWidgets.QMainWindow):
         self.__lower_padding_slider.setMinimum(0)
         self.__lower_padding_slider.setMaximum(HEIGHT)
         self.__lower_padding_slider.setValue(int(self.__lower_padding))
-        self.__lower_padding_slider.valueChanged[int].connect(self.on_lower_padding_changed)
+        self.__lower_padding_slider.valueChanged[int].connect(
+            self.on_lower_padding_changed)
         padding_layout.addWidget(QtWidgets.QLabel('Lower'))
         padding_layout.addWidget(self.__lower_padding_slider)
         mountains_layout.addLayout(padding_layout)
 
-
         mountain_modifier_layout = QtWidgets.QHBoxLayout()
         # Mountain Intersecion
-        self.__mountain_intersection_slider = QtWidgets.QSlider(QtCore.Qt.Horizontal)
+        self.__mountain_intersection_slider = QtWidgets.QSlider(
+            QtCore.Qt.Horizontal)
         self.__mountain_intersection_slider.setMinimum(0)
         self.__mountain_intersection_slider.setMaximum(100)
-        self.__mountain_intersection_slider.setValue(int(self.__mountain_intersection))
-        self.__mountain_intersection_slider.valueChanged[int].connect(self.on_mountain_intersection_changed)
+        self.__mountain_intersection_slider.setValue(
+            int(self.__mountain_intersection))
+        self.__mountain_intersection_slider.valueChanged[int].connect(
+            self.on_mountain_intersection_changed)
         mountain_modifier_layout.addWidget(QtWidgets.QLabel('Intersecions'))
         mountain_modifier_layout.addWidget(self.__mountain_intersection_slider)
 
@@ -347,7 +417,6 @@ class Window(QtWidgets.QMainWindow):
         mountains_layout.addLayout(mountain_modifier_layout)
         mountain_group.setLayout(mountains_layout)
 
-
         # Colors Group
         colors_group = QtWidgets.QGroupBox()
         colors_group.setTitle('Colors')
@@ -356,15 +425,18 @@ class Window(QtWidgets.QMainWindow):
         # color_palette_combobox = self.__create_combobox(COLOR_PALETTES.keys())
         self.__color_palette_combobox = QtWidgets.QComboBox()
         self.__color_palette_combobox.addItems(COLOR_PALETTES.keys())
-        self.__currentPaletteIndex = list(COLOR_PALETTES.keys()).index(self.__color_palette)
-        self.__color_palette_combobox.setCurrentIndex(self.__currentPaletteIndex)
+        self.__currentPaletteIndex = list(COLOR_PALETTES.keys()).index(
+            self.__color_palette)
+        self.__color_palette_combobox.setCurrentIndex(
+            self.__currentPaletteIndex)
         self.__color_palette_combobox.currentIndexChanged[int].connect(
             self.on_color_palette_changed)
         self.__color_palette_layout = QtWidgets.QHBoxLayout()
         label = QtWidgets.QLabel("Palette")
         label.setFixedWidth(60)
         self.__color_palette_layout.addWidget(label)
-        self.__color_palette_layout.addWidget(self.__color_palette_combobox)#, alignment=QtCore.Qt.AlignLeft)
+        self.__color_palette_layout.addWidget(
+            self.__color_palette_combobox)  #, alignment=QtCore.Qt.AlignLeft)
 
         # Reset palette
         self.__reset_palette_button = QtWidgets.QPushButton("Reset Palette")
@@ -378,8 +450,11 @@ class Window(QtWidgets.QMainWindow):
         self.__custom_colors_layout = QtWidgets.QHBoxLayout()
         # Sky Color
         self.__sky_color_button = QtWidgets.QPushButton()
-        background = (self.__sky_color[2], self.__sky_color[1], self.__sky_color[0])
-        self.__sky_color_button.setStyleSheet("background-color:rgb{}; border-style: outset; border: none; border-radius: 4px;".format(background))
+        background = (self.__sky_color[2], self.__sky_color[1],
+                      self.__sky_color[0])
+        self.__sky_color_button.setStyleSheet(
+            "background-color:rgb{}; border-style: outset; border: none; border-radius: 4px;"
+            .format(background))
         self.__sky_color_button.clicked.connect(
             self.on_sky_color_button_clicked)
         label = QtWidgets.QLabel("Sky")
@@ -389,8 +464,11 @@ class Window(QtWidgets.QMainWindow):
 
         # Sun Color
         self.__sun_color_button = QtWidgets.QPushButton()
-        background = (self.__sun_color[2], self.__sun_color[1], self.__sun_color[0])
-        self.__sun_color_button.setStyleSheet("background-color:rgb{}; border-style: outset; border: none; border-radius: 4px;".format(background))
+        background = (self.__sun_color[2], self.__sun_color[1],
+                      self.__sun_color[0])
+        self.__sun_color_button.setStyleSheet(
+            "background-color:rgb{}; border-style: outset; border: none; border-radius: 4px;"
+            .format(background))
         self.__sun_color_button.clicked.connect(
             self.on_sun_color_button_clicked)
         label = QtWidgets.QLabel("Sun")
@@ -400,8 +478,11 @@ class Window(QtWidgets.QMainWindow):
 
         # Mountain Color
         self.__gradient_color_button = QtWidgets.QPushButton()
-        background = (self.__gradient_color[2], self.__gradient_color[1], self.__gradient_color[0])
-        self.__gradient_color_button.setStyleSheet("background-color:rgb{}; border-style: outset; border: none; border-radius: 4px;".format(background))
+        background = (self.__gradient_color[2], self.__gradient_color[1],
+                      self.__gradient_color[0])
+        self.__gradient_color_button.setStyleSheet(
+            "background-color:rgb{}; border-style: outset; border: none; border-radius: 4px;"
+            .format(background))
         self.__gradient_color_button.clicked.connect(
             self.on_gradient_color_button_clicked)
         label = QtWidgets.QLabel("Land")
@@ -450,9 +531,9 @@ class Window(QtWidgets.QMainWindow):
         self.__image_frame = QtWidgets.QLabel()
         self.__image = np.zeros((HEIGHT, WIDTH, 4), np.uint8)
         self.__image[:, :] = COLOR_PALETTES[self.__color_palette]["sky"]
-        qImage = QtGui.QImage(
-            self.__image.data, self.__image.shape[1], self.__image.shape[0],
-            QtGui.QImage.Format_ARGB32)
+        qImage = QtGui.QImage(self.__image.data, self.__image.shape[1],
+                              self.__image.shape[0],
+                              QtGui.QImage.Format_ARGB32)
         self.__image_frame.setPixmap(QtGui.QPixmap.fromImage(qImage))
 
         # Main Layout
@@ -466,12 +547,10 @@ class Window(QtWidgets.QMainWindow):
 
         self.setWindowTitle('Landscape')
 
-
     def on_sky_element_changed(self, value):
         self.__currentSkyElementIndex = value
         self.__sky_element = SKY_ELEMENT_OPTIONS[self.__currentSkyElementIndex]
         self.__update()
-
 
     def on_sun_radius_changed(self, value):
         # normalized_value = value / 100
@@ -483,31 +562,25 @@ class Window(QtWidgets.QMainWindow):
         #normalized_value
         self.__update()
 
-
     def on_center_x_changed(self, value):
         self.__center_x = value
         self.__update()
-
 
     def on_center_y_changed(self, value):
         self.__center_y = value
         self.__update()
 
-
     def on_decrease_roughness_changed(self, value):
         self.__decrease_roughness = value
         self.__update()
 
-
     def on_generate_mountains_button_clicked(self):
-        self.__mountains = generate_mountains(self.__image, 
-                                          int(self.__mountain_layers_edit.text()), 
-                                          int(self.__roughness_edit.text()),
-                                          self.__decrease_roughness)
+        self.__mountains = generate_mountains(
+            self.__image, int(self.__mountain_layers_edit.text()),
+            int(self.__roughness_edit.text()), self.__decrease_roughness)
         self.__smooth = 0
         self.__smooth_slider.setValue(0)
         self.__update()
-
 
     def on_upper_padding_changed(self, value):
         if value < HEIGHT - self.__lower_padding:
@@ -517,7 +590,6 @@ class Window(QtWidgets.QMainWindow):
 
         self.__update()
 
-
     def on_lower_padding_changed(self, value):
         if value < HEIGHT - self.__upper_padding:
             self.__lower_padding = value
@@ -525,106 +597,128 @@ class Window(QtWidgets.QMainWindow):
             self.__lower_padding = HEIGHT - self.__upper_padding - 1
         self.__update()
 
-
     def on_mountain_intersection_changed(self, value):
         self.__mountain_intersection = value
-        self.__update() 
-
+        self.__update()
 
     def on_smooth_changed(self, value):
         self.__smooth = value
-        self.__smoothed_mountains = smooth_mountains(self.__mountains, self.__smooth)
+        self.__smoothed_mountains = smooth_mountains(self.__mountains,
+                                                     self.__smooth)
         self.__update()
-
 
     def on_color_palette_changed(self, value):
         self.__currentPaletteIndex = value
-        self.__color_palette = list(COLOR_PALETTES.keys())[self.__currentPaletteIndex]
+        self.__color_palette = list(
+            COLOR_PALETTES.keys())[self.__currentPaletteIndex]
         self.__sky_color = COLOR_PALETTES[self.__color_palette]["sky"]
-        background = (self.__sky_color[2], self.__sky_color[1], self.__sky_color[0])
-        self.__sky_color_button.setStyleSheet("background-color:rgb{}; border-style: outset; border: none; border-radius: 4px;".format(background))
+        background = (self.__sky_color[2], self.__sky_color[1],
+                      self.__sky_color[0])
+        self.__sky_color_button.setStyleSheet(
+            "background-color:rgb{}; border-style: outset; border: none; border-radius: 4px;"
+            .format(background))
         self.__sun_color = COLOR_PALETTES[self.__color_palette]["sun"]
-        background = (self.__sun_color[2], self.__sun_color[1], self.__sun_color[0])
-        self.__sun_color_button.setStyleSheet("background-color:rgb{}; border-style: outset; border: none; border-radius: 4px;".format(background))
+        background = (self.__sun_color[2], self.__sun_color[1],
+                      self.__sun_color[0])
+        self.__sun_color_button.setStyleSheet(
+            "background-color:rgb{}; border-style: outset; border: none; border-radius: 4px;"
+            .format(background))
         self.__gradient_color = COLOR_PALETTES[self.__color_palette]["land"][0]
-        background = (self.__gradient_color[2], self.__gradient_color[1], self.__gradient_color[0])
-        self.__gradient_color_button.setStyleSheet("background-color:rgb{}; border-style: outset; border: none; border-radius: 4px;".format(background))
+        background = (self.__gradient_color[2], self.__gradient_color[1],
+                      self.__gradient_color[0])
+        self.__gradient_color_button.setStyleSheet(
+            "background-color:rgb{}; border-style: outset; border: none; border-radius: 4px;"
+            .format(background))
         self.__land_color = COLOR_PALETTES[self.__color_palette]["land"]
         self.__update()
-
 
     def on_sky_color_button_clicked(self, value):
         selected_color = QtWidgets.QColorDialog().getColor().getRgb()
-        self.__sky_color_button.setStyleSheet("background-color:rgb{}; border-style: outset; border: none; border-radius: 4px;".format(selected_color))
-        self.__sky_color = (selected_color[2], selected_color[1], selected_color[0], 255)
+        self.__sky_color_button.setStyleSheet(
+            "background-color:rgb{}; border-style: outset; border: none; border-radius: 4px;"
+            .format(selected_color))
+        self.__sky_color = (selected_color[2], selected_color[1],
+                            selected_color[0], 255)
         self.__update()
-
 
     def on_sun_color_button_clicked(self, value):
         selected_color = QtWidgets.QColorDialog().getColor().getRgb()
-        self.__sun_color_button.setStyleSheet("background-color:rgb{}; border-style: outset; border: none; border-radius: 4px;".format(selected_color))
-        self.__sun_color = (selected_color[2], selected_color[1], selected_color[0], 255)
+        self.__sun_color_button.setStyleSheet(
+            "background-color:rgb{}; border-style: outset; border: none; border-radius: 4px;"
+            .format(selected_color))
+        self.__sun_color = (selected_color[2], selected_color[1],
+                            selected_color[0], 255)
         self.__update()
-
 
     def on_gradient_color_button_clicked(self, value):
         selected_color = QtWidgets.QColorDialog().getColor().getRgb()
-        self.__gradient_color_button.setStyleSheet("background-color:rgb{}; border-style: outset; border: none; border-radius: 4px;".format(selected_color))
-        self.__gradient_color = (selected_color[2], selected_color[1], selected_color[0], 255)
+        self.__gradient_color_button.setStyleSheet(
+            "background-color:rgb{}; border-style: outset; border: none; border-radius: 4px;"
+            .format(selected_color))
+        self.__gradient_color = (selected_color[2], selected_color[1],
+                                 selected_color[0], 255)
         self.__land_color = [self.__gradient_color]
         self.__update()
 
-
     def on_reset_palette_button_clicked(self, value):
         self.__sky_color = COLOR_PALETTES[self.__color_palette]["sky"]
-        background = (self.__sky_color[2], self.__sky_color[1], self.__sky_color[0])
-        self.__sky_color_button.setStyleSheet("background-color:rgb{}; border-style: outset; border: none; border-radius: 4px;".format(background))
+        background = (self.__sky_color[2], self.__sky_color[1],
+                      self.__sky_color[0])
+        self.__sky_color_button.setStyleSheet(
+            "background-color:rgb{}; border-style: outset; border: none; border-radius: 4px;"
+            .format(background))
         self.__sun_color = COLOR_PALETTES[self.__color_palette]["sun"]
-        background = (self.__sun_color[2], self.__sun_color[1], self.__sun_color[0])
-        self.__sun_color_button.setStyleSheet("background-color:rgb{}; border-style: outset; border: none; border-radius: 4px;".format(background))
+        background = (self.__sun_color[2], self.__sun_color[1],
+                      self.__sun_color[0])
+        self.__sun_color_button.setStyleSheet(
+            "background-color:rgb{}; border-style: outset; border: none; border-radius: 4px;"
+            .format(background))
         self.__gradient_color = COLOR_PALETTES[self.__color_palette]["land"][0]
-        background = (self.__gradient_color[2], self.__gradient_color[1], self.__gradient_color[0])
-        self.__gradient_color_button.setStyleSheet("background-color:rgb{}; border-style: outset; border: none; border-radius: 4px;".format(background))
+        background = (self.__gradient_color[2], self.__gradient_color[1],
+                      self.__gradient_color[0])
+        self.__gradient_color_button.setStyleSheet(
+            "background-color:rgb{}; border-style: outset; border: none; border-radius: 4px;"
+            .format(background))
         self.__land_color = COLOR_PALETTES[self.__color_palette]["land"]
         self.__update()
-
-
 
     def on_white_contour_changed(self, value):
         self.__white_contour = value
         self.__update()
-
 
     def on_margin_changed(self, value):
         self.__currentMarginIndex = value
         self.__margin = MARGIN_OPTIONS[self.__currentMarginIndex]
         self.__update()
 
-
     def __update(self):
 
         # Generate Image
         self.__image = generate_image(WIDTH, HEIGHT, self.__sky_color)
-        self.__image = draw_sun(self.__image, self.__sun_radius, self. __center_x,
-                                      self.__center_y, self.__sun_color,
-                                      self.__white_contour, self.__sky_element)
+        self.__image = draw_sun(self.__image, self.__sun_radius,
+                                self.__center_x, self.__center_y,
+                                self.__sun_color, self.__white_contour,
+                                self.__sky_element)
         mountains = self.__smoothed_mountains if self.__smooth else self.__mountains
 
-        normalize_mountains(mountains, HEIGHT, self.__lower_padding, self.__upper_padding, self.__mountain_intersection)
+        normalize_mountains(mountains, HEIGHT, self.__lower_padding,
+                            self.__upper_padding, self.__mountain_intersection)
 
-        self.__image = draw_mountains(self.__image, mountains, WIDTH, HEIGHT,    
-                                      self.__land_color, self.__sky_color, self.__white_contour)
+        self.__image = draw_mountains(self.__image, mountains, WIDTH, HEIGHT,
+                                      self.__land_color, self.__sky_color,
+                                      self.__white_contour)
 
         if not self.__margin == "None":
-            self.__image = draw_margin(self.__image, self.__margin, WIDTH, HEIGHT)
+            self.__image = draw_margin(self.__image, self.__margin, WIDTH,
+                                       HEIGHT)
 
-        self.__image = cv2.blur(self.__image,(2,2))
+        self.__image = cv2.blur(self.__image, (2, 2))
 
         self.__image = apply_texture(self.__image, TEX, 0.5)
 
-        qImage = QtGui.QImage(
-            self.__image.data, self.__image.shape[1], self.__image.shape[0],
-            QtGui.QImage.Format_ARGB32)
+        qImage = QtGui.QImage(self.__image.data, self.__image.shape[1],
+                              self.__image.shape[0],
+                              QtGui.QImage.Format_ARGB32)
         self.__image_frame.setPixmap(QtGui.QPixmap.fromImage(qImage))
         self.__image_frame.repaint()
 
