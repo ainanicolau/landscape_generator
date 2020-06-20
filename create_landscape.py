@@ -11,8 +11,16 @@ from PIL import Image
 import midpoint_displacement as md
 
 # Image Resolution
-WIDTH = 420
-HEIGHT = 595
+# WIDTH = 420
+# HEIGHT = 595
+# 4960 x 7016
+# 1191 x 1684
+# 842 x 1191
+# (496, 702)
+# 2480 x 3508
+# 3508 x 4960
+WIDTH = 2480
+HEIGHT = 3508
 
 # Color Palettes
 COLOR_PALETTES = {
@@ -96,7 +104,9 @@ MARGIN_OPTIONS = ["None", "Circle", "Window"]
 
 SKY_ELEMENT_OPTIONS = ["Sun", "Moon"]
 # Texture files
-TEX = "paint.jpg"
+# TEX = "paint.jpg"
+TEX = "texture.jpg"
+TEX_LOW = "texture_low.jpg"
 
 
 def generate_image(width, height, color):
@@ -138,14 +148,14 @@ def draw_sun(image, radius, center_x, center_y, color, white_contour,
     return image
 
 
-def generate_mountains(image, num_layers, roughness, decrease_roughness):
+def generate_mountains(image, num_layers, roughness, decrease_roughness, weight, height):
     mountains = []
     for layer in range(num_layers):
         if not decrease_roughness:
             layer_roughness = roughness
         else:
             layer_roughness = roughness // (layer + 1)
-        layer_heights = md.run_midpoint_displacement(layer_roughness)
+        layer_heights = md.run_midpoint_displacement(layer_roughness, weight, height)
         mountains.append(layer_heights)
 
     return mountains
@@ -284,6 +294,7 @@ class Window(QtWidgets.QMainWindow):
         self.__land_color = COLOR_PALETTES[self.__color_palette]["land"]
         self.__white_contour = 0
         self.__margin = "None"
+        self.__image_name = "myLandscape.png"
 
         # Sky Element Group
         sky_element_group = QtWidgets.QGroupBox()
@@ -520,19 +531,30 @@ class Window(QtWidgets.QMainWindow):
         details_layout.addLayout(self.__margin_layout)
         details_group.setLayout(details_layout)
 
+        # Save Image
+        save_image_layout = QtWidgets.QHBoxLayout()
+        self.__image_name_edit = QtWidgets.QLineEdit(self.__image_name)
+        save_image_layout.addWidget(self.__image_name_edit)
+        save_image_button = QtWidgets.QPushButton("Save")
+        save_image_button.clicked.connect(
+            self.on_save_image_button_clicked)
+        save_image_layout.addWidget(save_image_button)
+
         # Parameters Layout
         parameters_layout = QtWidgets.QVBoxLayout()
         parameters_layout.addWidget(sky_element_group)
         parameters_layout.addWidget(mountain_group)
         parameters_layout.addWidget(colors_group)
         parameters_layout.addWidget(details_group)
+        parameters_layout.addLayout(save_image_layout)
 
         # Image
         self.__image_frame = QtWidgets.QLabel()
         self.__image = np.zeros((HEIGHT, WIDTH, 4), np.uint8)
         self.__image[:, :] = COLOR_PALETTES[self.__color_palette]["sky"]
-        qImage = QtGui.QImage(self.__image.data, self.__image.shape[1],
-                              self.__image.shape[0],
+        resized = cv2.resize(self.__image, (496, 702), interpolation=cv2.INTER_LINEAR)
+        qImage = QtGui.QImage(resized.data,resized.shape[1],
+                              resized.shape[0],
                               QtGui.QImage.Format_ARGB32)
         self.__image_frame.setPixmap(QtGui.QPixmap.fromImage(qImage))
 
@@ -545,7 +567,7 @@ class Window(QtWidgets.QMainWindow):
         widget.setLayout(layout)
         self.setCentralWidget(widget)
 
-        self.setWindowTitle('Landscape')
+        self.setWindowTitle('Boho Minimalist Landscape Generator')
 
     def on_sky_element_changed(self, value):
         self.__currentSkyElementIndex = value
@@ -577,7 +599,7 @@ class Window(QtWidgets.QMainWindow):
     def on_generate_mountains_button_clicked(self):
         self.__mountains = generate_mountains(
             self.__image, int(self.__mountain_layers_edit.text()),
-            int(self.__roughness_edit.text()), self.__decrease_roughness)
+            int(self.__roughness_edit.text()), self.__decrease_roughness, WIDTH, HEIGHT)
         self.__smooth = 0
         self.__smooth_slider.setValue(0)
         self.__update()
@@ -691,6 +713,17 @@ class Window(QtWidgets.QMainWindow):
         self.__margin = MARGIN_OPTIONS[self.__currentMarginIndex]
         self.__update()
 
+    def on_save_image_button_clicked(self, value):
+        image = self.__image 
+        resized = cv2.resize(image, (4960,7016), interpolation=cv2.INTER_LINEAR)
+
+        resized = apply_texture(resized, TEX, 0.5)
+        # image.imsave(self.__image_name_edit.text())
+        cv2.imwrite(self.__image_name_edit.text(), resized) 
+  #     WIDTH = 420
+        # HEIGHT = 595
+
+
     def __update(self):
 
         # Generate Image
@@ -712,12 +745,14 @@ class Window(QtWidgets.QMainWindow):
             self.__image = draw_margin(self.__image, self.__margin, WIDTH,
                                        HEIGHT)
 
-        self.__image = cv2.blur(self.__image, (2, 2))
+        # self.__image = cv2.blur(self.__image, (2, 2))
 
-        self.__image = apply_texture(self.__image, TEX, 0.5)
+        resized = cv2.resize(self.__image, (496, 702), interpolation=cv2.INTER_LINEAR)
 
-        qImage = QtGui.QImage(self.__image.data, self.__image.shape[1],
-                              self.__image.shape[0],
+        resized = apply_texture(resized, TEX_LOW, 0.5)
+
+        qImage = QtGui.QImage(resized.data, resized.shape[1],
+                              resized.shape[0],
                               QtGui.QImage.Format_ARGB32)
         self.__image_frame.setPixmap(QtGui.QPixmap.fromImage(qImage))
         self.__image_frame.repaint()
