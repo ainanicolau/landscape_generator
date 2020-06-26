@@ -254,7 +254,7 @@ def smooth_mountains(mountains, smooth_value):
 
 def apply_texture(image, texture, alpha):
     """
-    Given an image and a texture, it merges both using the texture as a mask. 
+    Given an image and a texture, it merges both using the texture as a mask.
     """
     out = np.ones(image.shape, np.uint8) * 255
     texture = cv2.imread(texture)
@@ -739,7 +739,7 @@ class Window(QtWidgets.QMainWindow):
         resized = cv2.resize(self.__image, (496, 702),
                              interpolation=cv2.INTER_LINEAR)
 
-        apply_texture(resized, TEX_LOW, 0.5)
+        resized = apply_texture(resized, TEX_LOW, 0.5)
 
         qImage = QtGui.QImage(resized.data, resized.shape[1], resized.shape[0],
                               QtGui.QImage.Format_ARGB32)
