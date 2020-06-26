@@ -5,7 +5,6 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 import cv2
 import numpy as np
 import math
-from colour import Color
 from PIL import Image
 
 import midpoint_displacement as md
