@@ -76,6 +76,11 @@ COLOR_PALETTES = {
         "sky": (226, 231, 235, 255),
         "land": [(150, 196, 77, 255)]
     },
+    "Mono": {
+        "sun": (101, 134, 197, 255),
+        "sky": (101, 134, 197, 255),
+        "land": [(101, 134, 197, 255),(101, 134, 197, 255)]
+    }
     # "Ocean": {
     #     "sun": (100, 169, 195, 255),
     #     "sky": (226, 231, 235, 255),
@@ -128,14 +133,16 @@ def draw_sun(image, radius, center_x, center_y, color, white_contour,
     option to draw the contours in white. The sun can be changes into a moon
     if specified.
     """
+    contour_color = (255, 255, 255, 255)
+    # contour_color = (0, 0, 0, 255)
     center = (center_x, center_y)
     if radius > 0:
         if sky_element == "Sun":
             cv2.circle(image, center, radius, color, thickness=-1, lineType=8,
                        shift=0)
             if white_contour:
-                cv2.circle(image, center, radius, (255, 255, 255, 255),
-                           thickness=10, lineType=8, shift=0)
+                cv2.circle(image, center, radius, contour_color,
+                           thickness=12, lineType=8, shift=0)
         if sky_element == "Moon":
             inner_center = (center_x + int(radius / 3),
                             center_y - int(radius / 3))
@@ -152,7 +159,7 @@ def draw_sun(image, radius, center_x, center_y, color, white_contour,
                 ret, thresh = cv2.threshold(imgray, 127, 255, 0)
                 contours, _ = cv2.findContours(thresh, cv2.RETR_TREE,
                                                cv2.CHAIN_APPROX_SIMPLE)
-                cv2.drawContours(image, contours, -1, (255, 255, 255, 255), 10)
+                cv2.drawContours(image, contours, -1, contour_color, 12)
 
 
 def generate_mountains(image, num_layers, roughness, decrease_roughness,
@@ -200,6 +207,8 @@ def draw_mountains(image, mountains, imageWidth, imageHeight, mountain_color,
     and the bottom corners of the image. Has the possibility to add the white
     contours.
     """
+    contour_color = (255, 255, 255, 255)
+    # contour_color = (0, 0, 0, 255)
     if len(mountain_color) == 1:
         colors = interpolate_colors(mountain_color[0], sky_color,
                                     len(mountains) + 1)
@@ -221,7 +230,7 @@ def draw_mountains(image, mountains, imageWidth, imageHeight, mountain_color,
         cv2.fillPoly(image, [points], layer_color)
 
         if white_contour:
-            cv2.polylines(image, [points], True, (255, 255, 255, 255), 10)
+            cv2.polylines(image, [points], True, contour_color, 12)
 
 
 def interpolate_colors(color1, color2, divisions):
