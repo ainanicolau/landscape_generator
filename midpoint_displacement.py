@@ -17,12 +17,23 @@ def parseArguments():
     """
     Parses command line options.
     """
-    parser = argparse.ArgumentParser(description="Implementation of midpoint "
-                                                 "displacement algorithm")
-    parser.add_argument('--layers', '-l', type=int, default=3,
-                        help="number of layers (default: 3)")
-    parser.add_argument('--roughness', '-r', type=int, default=200,
-                        help="roughness factor (default: 100)")
+    parser = argparse.ArgumentParser(
+        description="Implementation of midpoint " "displacement algorithm"
+    )
+    parser.add_argument(
+        "--layers",
+        "-l",
+        type=int,
+        default=3,
+        help="number of layers (default: 3)",
+    )
+    parser.add_argument(
+        "--roughness",
+        "-r",
+        type=int,
+        default=200,
+        help="roughness factor (default: 100)",
+    )
     args = parser.parse_args()
 
     # Left and right points
@@ -38,8 +49,9 @@ def run_midpoint_displacement(roughness, width, height):
     while len(points_to_process) > 0:
         previous, next, roughness = points_to_process.popleft()
         midpoint_x = find_horizontal_midpoint(previous, next)
-        midpoint_y = compute_midpoint_height(previous, next, heights,
-                                             roughness)
+        midpoint_y = compute_midpoint_height(
+            previous, next, heights, roughness
+        )
 
         # Update heights with the new point
         heights[midpoint_x] = midpoint_y
@@ -129,13 +141,15 @@ def main():
 
     image = Image.new("RGB", (WIDTH, HEIGHT), (255, 255, 255))
 
-    layers = []
     for layer in range(args.layers):
         layer_roughness = args.roughness // (layer + 1)
-        layer_heights = run_midpoint_displacement(layer_roughness, WIDTH, HEIGHT)
+        layer_heights = run_midpoint_displacement(
+            layer_roughness, WIDTH, HEIGHT
+        )
 
-        layer_heights = normalize(layer_heights, HEIGHT - IMAGE_PADDING,
-                                  IMAGE_PADDING + layer * 200)
+        layer_heights = normalize(
+            layer_heights, HEIGHT - IMAGE_PADDING, IMAGE_PADDING + layer * 200
+        )
 
         image = renderImage(image, layer_heights, layer, WIDTH, HEIGHT)
 
@@ -143,5 +157,5 @@ def main():
     image.save("landscape.png")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()
