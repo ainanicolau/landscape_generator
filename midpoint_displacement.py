@@ -1,43 +1,8 @@
 #!/usr/bin/env python3
 
-import argparse
 import random
 import numpy as np
 from collections import deque
-from PIL import Image, ImageDraw
-
-
-# Image Resolution
-WIDTH = 513
-HEIGHT = 720
-IMAGE_PADDING = 50
-
-
-def parseArguments():
-    """
-    Parses command line options.
-    """
-    parser = argparse.ArgumentParser(
-        description="Implementation of midpoint " "displacement algorithm"
-    )
-    parser.add_argument(
-        "--layers",
-        "-l",
-        type=int,
-        default=3,
-        help="number of layers (default: 3)",
-    )
-    parser.add_argument(
-        "--roughness",
-        "-r",
-        type=int,
-        default=200,
-        help="roughness factor (default: 100)",
-    )
-    args = parser.parse_args()
-
-    # Left and right points
-    return args
 
 
 def run_midpoint_displacement(roughness, width, height):
@@ -115,47 +80,3 @@ def normalize(data, lowerBound, upperBound):
     newRange = upperBound - lowerBound
 
     return [(a - min_) * newRange / previousRange + lowerBound for a in data]
-
-
-def renderImage(image, heights, layer, imageWidth, imageHeight):
-    """
-    Generates an image with the result of the midpoint displacement algorithm
-    and plots it.
-    """
-    colormap = ["#FF5733", "#C70039", "#900C3F"]
-    # Convert the heights into the list of points of a polygon
-    points = [(i, heights[i]) for i in range(0, imageWidth)]
-
-    # Add the lower corners of the image to close the polygon
-    points.insert(0, (0, imageHeight))
-    points.append((imageWidth - 1, imageHeight))
-
-    draw = ImageDraw.Draw(image)
-    draw.polygon(points, fill=colormap[layer])
-
-    return image
-
-
-def main():
-    args = parseArguments()
-
-    image = Image.new("RGB", (WIDTH, HEIGHT), (255, 255, 255))
-
-    for layer in range(args.layers):
-        layer_roughness = args.roughness // (layer + 1)
-        layer_heights = run_midpoint_displacement(
-            layer_roughness, WIDTH, HEIGHT
-        )
-
-        layer_heights = normalize(
-            layer_heights, HEIGHT - IMAGE_PADDING, IMAGE_PADDING + layer * 200
-        )
-
-        image = renderImage(image, layer_heights, layer, WIDTH, HEIGHT)
-
-    image.show()
-    image.save("landscape.png")
-
-
-if __name__ == "__main__":
-    main()
