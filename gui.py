@@ -3,7 +3,7 @@ import math
 import numpy as np
 from PyQt5 import QtCore, QtGui, QtWidgets
 
-from create_landscape import (
+from drawing_utils import (
     apply_texture,
     generate_image,
     generate_mountains,
@@ -120,8 +120,8 @@ MARGIN_OPTIONS = ["None", "Circle", "Window"]
 SKY_ELEMENT_OPTIONS = ["Sun", "Moon"]
 
 # Textures
-TEX = "texture.jpg"
-TEX_LOW = "texture_low.jpg"
+TEX = "img/texture.jpg"
+TEX_LOW = "img/texture_low.jpg"
 
 # Buttons style
 STYLE = (
@@ -465,7 +465,7 @@ class CreateLandscapeGUI(QtWidgets.QMainWindow):
         widget.setLayout(layout)
         self.setCentralWidget(widget)
 
-        self.setWindowTitle("Boho Minimalist Landscape Generator")
+        self.setWindowTitle("Minimalist Landscape Generator")
 
     def __initialize_defaults(self):
         """
