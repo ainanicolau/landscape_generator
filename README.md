@@ -6,6 +6,7 @@ The landscape is generated using the Midpoint Displacement algorithm, which prod
 
 With this tool, users can easily create custom landscapes for a variety of purposes, such as backgrounds for websites, desktop wallpapers, or artistic projects. The tool is written in Python and uses the Qt framework for the user interface.
 
+![alt text](img/gui.png)
 ## Getting Started
 
 To use this tool, you will need to have Python 3 installed on your system. You can download the latest version of Python from the official website: https://www.python.org/downloads/
