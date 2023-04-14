@@ -133,31 +133,50 @@ STYLE = (
 
 
 class CreateLandscapeGUI(QtWidgets.QMainWindow):
+    """
+    A graphical user interface for generating landscape images with
+    customizable settings.
+
+    The user interface provides controls for adjusting the appearance of the
+    sky, sun, mountains, and other elements of the landscape, as well as
+    options for saving the images. The main window displays a preview of the
+    landscape image with the current settings.
+    """
+
     def __init__(self):
+        """
+        Attributes:
+            __image (np.ndarray): The current landscape image as a numpy array.
+            __sky_color (Tuple[): The RGB color of the sky background.
+            __sun_color (Tuple): The RGB color of the sun.
+            __sun_radius (int): The radius of the sun in pixels.
+            __white_contour (bool): Whether to draw a white contour around the
+                sun.
+            __sky_element (bool): Whether to draw an element in the sky.
+            __mountains (List[float]): The initial generated mountain heights.
+            __smoothed_mountains (List[float]): The smoothed mountain heights.
+            __land_color (List): The colors of the land gradient.
+            __gradient_color (Tuple): The current selected color for the land.
+            __color_palette (str): The current selected color palette.
+            __lower_padding (int): The lower padding of the mountain in pixels.
+            __upper_padding (int): The upper padding of the mountain in pixels.
+            __mountain_intersection (float): The intersection point of the
+                mountains in the range [0, 1].
+            __smooth (bool): Whether to use the smoothed mountains or the
+                initial mountains for rendering.
+            __margin (str): The type of margin to apply to the final image.
+            __currentMarginIndex (int): The index of the current margin option
+                in the menu.
+            __center_x (int): The x-coordinate of the center of the image.
+            __center_y (int): The y-coordinate of the center of the image.
+            __image_name_edit (QtWidgets.QLineEdit): The line edit for entering
+                the image name.
+            __image_frame (QtWidgets.QLabel): The label for displaying the
+                landscape image preview.
+        """
         super().__init__()
 
-        # Attributes to build the image
-        self.__sky_element = "Sun"
-        self.__sun_radius = 0
-        self.__center_x = 0
-        self.__center_y = 0
-        self.__mountain_layers = 3
-        self.__roughness = 300
-        self.__decrease_roughness = 2
-        self.__mountains = []
-        self.__upper_padding = 100
-        self.__lower_padding = 100
-        self.__mountain_intersection = 0
-        self.__smoothed_mountains = []
-        self.__smooth = 0
-        self.__color_palette = "Desert"
-        self.__sky_color = COLOR_PALETTES[self.__color_palette]["sky"]
-        self.__sun_color = COLOR_PALETTES[self.__color_palette]["sun"]
-        self.__gradient_color = COLOR_PALETTES[self.__color_palette]["land"][0]
-        self.__land_color = COLOR_PALETTES[self.__color_palette]["land"]
-        self.__white_contour = 0
-        self.__margin = "None"
-        self.__image_name = "myLandscape.png"
+        self.__initialize_defaults()
 
         # Sky Element Group
         sky_element_group = QtWidgets.QGroupBox()
@@ -448,28 +467,94 @@ class CreateLandscapeGUI(QtWidgets.QMainWindow):
 
         self.setWindowTitle("Boho Minimalist Landscape Generator")
 
+    def __initialize_defaults(self):
+        """
+        Initializes the default values for the various parameters used in
+        generating the landscape image.
+        """
+        self.__sky_element = "Sun"
+        self.__sun_radius = 0
+        self.__center_x = 0
+        self.__center_y = 0
+        self.__mountain_layers = 3
+        self.__roughness = 300
+        self.__decrease_roughness = 2
+        self.__mountains = []
+        self.__upper_padding = 100
+        self.__lower_padding = 100
+        self.__mountain_intersection = 0
+        self.__smoothed_mountains = []
+        self.__smooth = 0
+        self.__color_palette = "Desert"
+        self.__sky_color = COLOR_PALETTES[self.__color_palette]["sky"]
+        self.__sun_color = COLOR_PALETTES[self.__color_palette]["sun"]
+        self.__gradient_color = COLOR_PALETTES[self.__color_palette]["land"][0]
+        self.__land_color = COLOR_PALETTES[self.__color_palette]["land"]
+        self.__white_contour = 0
+        self.__margin = "None"
+        self.__image_name = "myLandscape.png"
+
     def on_sky_element_changed(self, value):
+        """
+        Updates the sky element and triggers an update of the display.
+
+        Args:
+            value (int): Index of the new sky element to be displayed.
+        """
         self.__currentSkyElementIndex = value
         self.__sky_element = SKY_ELEMENT_OPTIONS[self.__currentSkyElementIndex]
-        self.__update()
+        self.__update_display()
 
     def on_sun_radius_changed(self, value):
+        """
+        Updates the radius of the sun and triggers an update of the display.
+
+        Args:
+            value (int): The new radius of the sun.
+        """
         self.__sun_radius = value
-        self.__update()
+        self.__update_display()
 
     def on_center_x_changed(self, value):
+        """
+        Updates the x-coordinate of the center of the sun and triggers an
+        update of the display.
+
+        Args:
+            value (int): The new x-coordinate of the center of the sun as a
+            percentage of the width of the display.
+        """
         self.__center_x = math.floor((value / 100) * WIDTH)
-        self.__update()
+        self.__update_display()
 
     def on_center_y_changed(self, value):
+        """
+        Updates the y-coordinate of the center of the sun and triggers an
+        update of the display.
+
+        Args:
+            value (int): The new y-coordinate of the center of the sun as a
+            percentage of the height of the display.
+        """
         self.__center_y = math.floor((value / 100) * HEIGHT)
-        self.__update()
+        self.__update_display()
 
     def on_decrease_roughness_changed(self, value):
+        """
+        Update the decrease roughness value based on the slider value and
+        update the display.
+
+        Args:
+            value: a float representing the new decrease roughness value
+        """
         self.__decrease_roughness = value
-        self.__update()
+        self.__update_display()
 
     def on_generate_mountains_button_clicked(self):
+        """
+        Generate new mountains based on the current parameters and update the
+        display.
+        """
         self.__mountains = generate_mountains(
             self.__image,
             int(self.__mountain_layers_edit.text()),
@@ -480,35 +565,72 @@ class CreateLandscapeGUI(QtWidgets.QMainWindow):
         )
         self.__smooth = 0
         self.__smooth_slider.setValue(0)
-        self.__update()
+        self.__update_display()
 
     def on_upper_padding_changed(self, value):
+        """
+        Update the upper padding value based on the slider value and update the
+        display. The upper padding cannot exceed the height of the landscape
+        minus the lower padding.
+
+        Args:
+            value: an integer representing the new upper padding value
+        """
         if value < HEIGHT - self.__lower_padding:
             self.__upper_padding = value
         else:
             self.__upper_padding = HEIGHT - self.__lower_padding - 1
 
-        self.__update()
+        self.__update_display()
 
     def on_lower_padding_changed(self, value):
+        """
+        Update the lower padding value based on the slider value and update the
+        display. The lower padding cannot exceed the height of the landscape
+        minus the upper padding.
+
+        Args:
+            value: an integer representing the new lower padding value
+        """
         if value < HEIGHT - self.__upper_padding:
             self.__lower_padding = value
         else:
             self.__lower_padding = HEIGHT - self.__upper_padding - 1
-        self.__update()
+
+        self.__update_display()
 
     def on_mountain_intersection_changed(self, value):
+        """
+        Updates the mountain intersection value and updates the display
+
+        Args:
+            value (float): The new value of the mountain intersection.
+        """
         self.__mountain_intersection = value
-        self.__update()
+        self.__update_display()
 
     def on_smooth_changed(self, value):
+        """
+        Updates the smooth value, smooths the mountains with the new smooth
+        value, and updates the display.
+
+        Args:
+            value (float): The new value of the smoothness slider.
+        """
         self.__smooth = value
         self.__smoothed_mountains = smooth_mountains(
             self.__mountains, self.__smooth
         )
-        self.__update()
+        self.__update_display()
 
     def on_color_palette_changed(self, value):
+        """
+        Updates the color palette used for generating the landscape based on
+        the selected option from the dropdown menu.
+
+        Args:
+            value (int): The index of the selected color palette.
+        """
         self.__currentPaletteIndex = value
         self.__color_palette = list(COLOR_PALETTES.keys())[
             self.__currentPaletteIndex
@@ -535,9 +657,14 @@ class CreateLandscapeGUI(QtWidgets.QMainWindow):
         )
         self.__gradient_color_button.setStyleSheet(STYLE.format(background))
         self.__land_color = COLOR_PALETTES[self.__color_palette]["land"]
-        self.__update()
+        self.__update_display()
 
-    def on_sky_color_button_clicked(self, value):
+    def on_sky_color_button_clicked(self):
+        """
+        Opens a color dialog to let the user select a new color for the sky.
+        Updates the sky color attribute with the selected color and updates the
+        display.
+        """
         selected_color = QtWidgets.QColorDialog().getColor().getRgb()
         self.__sky_color_button.setStyleSheet(STYLE.format(selected_color))
         self.__sky_color = (
@@ -546,9 +673,14 @@ class CreateLandscapeGUI(QtWidgets.QMainWindow):
             selected_color[0],
             255,
         )
-        self.__update()
+        self.__update_display()
 
-    def on_sun_color_button_clicked(self, value):
+    def on_sun_color_button_clicked(self):
+        """
+        Opens a color dialog to let the user select a new color for the sun.
+        Updates the sun color attribute with the selected color and updates the
+        display.
+        """
         selected_color = QtWidgets.QColorDialog().getColor().getRgb()
         self.__sun_color_button.setStyleSheet(STYLE.format(selected_color))
         self.__sun_color = (
@@ -557,9 +689,15 @@ class CreateLandscapeGUI(QtWidgets.QMainWindow):
             selected_color[0],
             255,
         )
-        self.__update()
+        self.__update_display()
 
-    def on_gradient_color_button_clicked(self, value):
+    def on_gradient_color_button_clicked(self):
+        """
+        Opens a color picker dialog to allow the user to select a new gradient
+        color.
+        Updates the gradient color and land color with the new color and
+        pdates the display.
+        """
         selected_color = QtWidgets.QColorDialog().getColor().getRgb()
         self.__gradient_color_button.setStyleSheet(
             STYLE.format(selected_color)
@@ -571,9 +709,13 @@ class CreateLandscapeGUI(QtWidgets.QMainWindow):
             255,
         )
         self.__land_color = [self.__gradient_color]
-        self.__update()
+        self.__update_display()
 
-    def on_reset_palette_button_clicked(self, value):
+    def on_reset_palette_button_clicked(self):
+        """
+        Resets the color palette to its default settings and updates the
+        display.
+        """
         self.__sky_color = COLOR_PALETTES[self.__color_palette]["sky"]
         background = (
             self.__sky_color[2],
@@ -596,29 +738,58 @@ class CreateLandscapeGUI(QtWidgets.QMainWindow):
         )
         self.__gradient_color_button.setStyleSheet(STYLE.format(background))
         self.__land_color = COLOR_PALETTES[self.__color_palette]["land"]
-        self.__update()
+        self.__update_display()
 
     def on_white_contour_changed(self, value):
+        """
+        Updates the presence of a white contour around the mountains and
+        triggers an update of the display.
+
+        Args:
+            value (bool): Whether or not to include a white contour around the
+            mountains.
+        """
         self.__white_contour = value
-        self.__update()
+        self.__update_display()
 
     def on_margin_changed(self, value):
+        """
+        Updates the margin size around the mountains and triggers an update of
+        the display.
+
+        Args:
+            value (int): The index of the selected margin size option.
+        """
         self.__currentMarginIndex = value
         self.__margin = MARGIN_OPTIONS[self.__currentMarginIndex]
-        self.__update()
+        self.__update_display()
 
     def on_save_image_button_clicked(self, value):
+        """
+        Saves the generated landscape image with the chosen file name and
+        format.
+
+        Args:
+            value (str): The chosen file name and format for the saved image.
+        """
         image = self.__image
         resized = cv2.resize(
             image, (4960, 7016), interpolation=cv2.INTER_LINEAR
         )
-
         resized = apply_texture(resized, TEX, 0.5)
         cv2.imwrite(self.__image_name_edit.text(), resized)
 
-    def __update(self):
+    def __update_display(self):
+        """
+        Updates the display with the latest configuration.
+        This function generates an image using the current configuration
+        parameters and displays it in the GUI.
+        """
+
         # Generate Image
         self.__image = generate_image(WIDTH, HEIGHT, self.__sky_color)
+
+        # Draw sun
         draw_sun(
             self.__image,
             self.__sun_radius,
@@ -628,10 +799,13 @@ class CreateLandscapeGUI(QtWidgets.QMainWindow):
             self.__white_contour,
             self.__sky_element,
         )
+
+        # Get mountains based on smooth flag
         mountains = (
             self.__smoothed_mountains if self.__smooth else self.__mountains
         )
 
+        # Normalize mountains based on padding and intersection
         normalize_mountains(
             mountains,
             HEIGHT,
@@ -640,6 +814,7 @@ class CreateLandscapeGUI(QtWidgets.QMainWindow):
             self.__mountain_intersection,
         )
 
+        # Draw mountains
         draw_mountains(
             self.__image,
             mountains,
@@ -650,19 +825,19 @@ class CreateLandscapeGUI(QtWidgets.QMainWindow):
             self.__white_contour,
         )
 
+        # Draw margin if specified
         if not self.__margin == "None":
             self.__image = draw_margin(
                 self.__image, self.__margin, WIDTH, HEIGHT
             )
 
-        # self.__image = cv2.blur(self.__image, (2, 2))
-
+        # Resize and apply texture to image
         resized = cv2.resize(
             self.__image, (496, 702), interpolation=cv2.INTER_LINEAR
         )
-
         resized = apply_texture(resized, TEX_LOW, 0.5)
 
+        # Convert image to QImage and set it as pixmap for display
         qImage = QtGui.QImage(
             resized.data,
             resized.shape[1],
